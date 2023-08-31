@@ -19,7 +19,7 @@ else
 		CFLAGS += -lglfw -lGLEW -lGL -lm
 
 		# Nome do arquivo de saída para linux
-		OUTFILE := $(SRC)_linux
+		OUTFILE := $(SRC)_linux.out
 	endif
 endif
 
