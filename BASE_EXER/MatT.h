@@ -7,8 +7,7 @@
 
 #include "Mat4.h"
 
-class MatT
-{
+class MatT {
     private:
         Mat4* transformation;
         Mat4* translation;

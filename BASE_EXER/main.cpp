@@ -11,9 +11,11 @@
 #include "Vec3.h"
 #include "Vec4.h"
 #include "OBJ3D.h"
-#include "BMPTexture.h"
 
 #include "stb_image.h"
+
+#define WAVEFRONT_PATH "./OBJ/obj/Skull.obj"
+#define TEXTURE_PATH "./OBJ/obj/textures/Skull.jpg"
 
 int main(void){
  
@@ -25,7 +27,7 @@ int main(void){
 
  
     // criando uma janela
-    GLFWwindow* window = glfwCreateWindow(800, 800, "Cubo", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 800, "Wavefront", NULL, NULL);
 
     
     // tornando a janela como principal 
@@ -133,38 +135,27 @@ int main(void){
 
 
     int width, height, nrChannels;
-    unsigned char *data = stbi_load("./OBJ/obj/textures/cottage_diffuse.png", &width, &height, &nrChannels, 0);
+    stbi_set_flip_vertically_on_load(true);
+    unsigned char *data = stbi_load(TEXTURE_PATH, &width, &height, &nrChannels, 0);
 
     if(data == nullptr) {
         std::cout << "A imagem não foi carregada" << std::endl;
     } else {
         std::cout << "Altura: " << height << ", Largura: " << width << ", Num.Chanels: " << nrChannels << std::endl;
-            // Give the image to OpenGL
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        // Give the image to OpenGL
+        if(nrChannels == 4) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        } else if(nrChannels == 3) {
+             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        }
         stbi_image_free(data);
     }
-
-    // BMPTexture texture("./OBJ/obj/textures/caixa.bmp");
-
-    // int r = texture.loadTexture();
-
-    // if(r == -1) {
-    //     std::cout << "File not found!" << std::endl;
-    //     return r;
-    // } else if(r == -2) {
-    //     std::cout << "Reading ERROR" << std::endl;
-    //     return r;
-    // } else {
-    //     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.getWidth(), texture.getHeight(), 0, GL_RGB, GL_UNSIGNED_BYTE, texture.getData());
-    // }
-
-    
 
     // Preparando dados para enviar a GPU
     std::vector<Vec3> vertices;
     std::vector<Vec3> normals;
     std::vector<Vec2> uvs;
-    OBJ3D obj("./OBJ/obj/cottage_obj.obj", GL_QUADS);
+    OBJ3D obj(WAVEFRONT_PATH, GL_QUAD_STRIP);
     int r = obj.loadOBJ3D_TRIANGLES(&vertices, &uvs, &normals);
 
     if(r == -1) {
@@ -223,10 +214,11 @@ int main(void){
         angulo += angulo_inc;
 
         mat_transformation.setScale(0.05);
+        mat_transformation.setTranslation(0, -0.5, 0);
 
-        // mat_transformation.setRotationX(angulo);
-        mat_transformation.setRotationY(angulo);
-        // mat_transformation.setRotationZ(angulo);
+        mat_transformation.setRotationX(angulo);
+        mat_transformation.setRotationY(M_PI/2);
+        mat_transformation.setRotationZ(M_PI/2);
 
         // enviando a matriz de transformacao para a GPU
         GLuint loc_mat_transformation = glGetUniformLocation(program, "mat_transformation");
@@ -236,8 +228,7 @@ int main(void){
         glBindTexture(GL_TEXTURE_2D, textureID);
         glDrawArrays(obj.getTypeRender(), 0, vertices.size());
  
-        glfwSwapBuffers(window);
-        
+        glfwSwapBuffers(window);   
     }
  
     glfwDestroyWindow(window);

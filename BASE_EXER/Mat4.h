@@ -1,7 +1,6 @@
 #ifndef __MAT_4_4__
 #define __MAT_4_4__
-class Mat4
-{
+class Mat4 {
     private:
         float* matrix;
     public:
