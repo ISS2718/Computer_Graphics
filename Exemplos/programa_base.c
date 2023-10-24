@@ -33,7 +33,7 @@ int main(void){
 
  
     // criando uma janela
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Minha Janela", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 800, "Minha Janela", NULL, NULL);
 
     
     // tornando a janela como principal 
