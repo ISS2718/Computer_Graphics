@@ -192,10 +192,6 @@ int main(void){
     glVertexAttribPointer(loc_texture_coord, 2, GL_FLOAT, GL_FALSE, sizeof(uvs[0]), (void*) 0); // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glVertexAttribPointer.xhtml
 
 
-    // Associando variávels do programa GLSL (Fragment Shader) para definir cores
-    // GLint loc_color = glGetUniformLocation(program, "color");
-
-
     // Exibindo nossa janela
     glfwShowWindow(window);
 
