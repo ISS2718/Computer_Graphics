@@ -69,11 +69,11 @@ static void key_event(GLFWwindow* window, int key, int scancode, int action, int
         lefting = true;
     }
 
-    if(key == GLFW_KEY_UP) {
+    if(key == GLFW_KEY_UP && !(mods == GLFW_MOD_SHIFT)) {
         rotate_x_up = true;
     }
 
-    if(key == GLFW_KEY_DOWN) {
+    if(key == GLFW_KEY_DOWN && !(mods == GLFW_MOD_SHIFT)) {
         rotate_x_down = true;
     }
 
