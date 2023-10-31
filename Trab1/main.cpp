@@ -69,27 +69,27 @@ static void key_event(GLFWwindow* window, int key, int scancode, int action, int
         lefting = true;
     }
 
-    if(key == GLFW_KEY_UP && !(mods == GLFW_MOD_SHIFT)) {
+    if(key == GLFW_KEY_UP) {
         rotate_x_up = true;
     }
 
-    if(key == GLFW_KEY_DOWN && !(mods == GLFW_MOD_SHIFT)) {
+    if(key == GLFW_KEY_DOWN) {
         rotate_x_down = true;
     }
 
-    if(key == GLFW_KEY_RIGHT) {
+    if(key == GLFW_KEY_RIGHT && !(mods == GLFW_MOD_SHIFT)) {
         rotate_y_up = true;
     }
 
-    if(key == GLFW_KEY_LEFT) {
+    if(key == GLFW_KEY_LEFT && !(mods == GLFW_MOD_SHIFT)) {
         rotate_y_down = true;
     }
 
-    if(key == GLFW_KEY_UP && mods == GLFW_MOD_SHIFT) {
+    if(key == GLFW_KEY_RIGHT && mods == GLFW_MOD_SHIFT) {
         rotate_z_up = true;
     }
 
-    if(key == GLFW_KEY_DOWN && mods == GLFW_MOD_SHIFT) {
+    if(key == GLFW_KEY_LEFT && mods == GLFW_MOD_SHIFT) {
         rotate_z_down = true;
     }
 
@@ -185,25 +185,25 @@ void verifyAndMakeRotate(OBJ3D &obj, MatT *mt_obj, Vec3 *actual_angle) {
     }
 
     if(rotate_y_up) {
-        actual_angle->setY(actual_angle->getY() + ANGLE_INC);
+        actual_angle->setY(actual_angle->getY() - ANGLE_INC);
         mt_obj->setRotationY(actual_angle->getY());
          rotate_y_up = false;
     }
 
     if(rotate_y_down) {
-        actual_angle->setY(actual_angle->getY() - ANGLE_INC);
+        actual_angle->setY(actual_angle->getY() + ANGLE_INC);
         mt_obj->setRotationY(actual_angle->getY());
         rotate_y_down = false;
     }
 
     if(rotate_z_up) {
-        actual_angle->setZ(actual_angle->getZ() + ANGLE_INC);
+        actual_angle->setZ(actual_angle->getZ() - ANGLE_INC);
         mt_obj->setRotationZ(actual_angle->getZ());
         rotate_z_up = false;
     }
 
     if(rotate_z_down) {
-        actual_angle->setZ(actual_angle->getZ() - ANGLE_INC);
+        actual_angle->setZ(actual_angle->getZ() + ANGLE_INC);
         mt_obj->setRotationZ(actual_angle->getZ());
         rotate_z_down = false;
     }
@@ -241,7 +241,7 @@ int main(void){
     }
 
     // Compilando o Vertex Shader e verificando erros
-    char *info = s.compileVertexShadder();
+    char *info = s.compileVertexShader();
     if(info != nullptr) {
         std::cout << "Erro de compilacao no Vertex Shader." << std::endl;
         std::cout<< "\t--> " << info << std::endl;
@@ -254,7 +254,7 @@ int main(void){
     }
 
     // Compilando o Fragment Shader e verificando erros
-    info = s.compileFragmentShadder();
+    info = s.compileFragmentShader();
     if(info != nullptr) {
         std::cout << "Erro de compilacao no Fragment Shader." << std::endl;
         std::cout<< "\t--> " << info << std::endl;
