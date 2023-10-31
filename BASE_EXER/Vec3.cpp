@@ -126,6 +126,26 @@ Vec3& Vec3::operator-=(const float &v) {
     return *this;
 }
 
+bool Vec3::operator==(const float &v) {
+    if((x == v) && (y == v) && (z == v)) {
+        return true;
+    }
+    return false;
+}
+
+bool Vec3::operator>=(const float &v) {
+    if((x >= v) && (y >= v) && (z >= v)) {
+        return true;
+    }
+    return false;
+}
+
+bool Vec3::operator<=(const float &v) {
+    if((x <= v) && (y <= v) && (z <= v)) {
+        return true;
+    }
+    return false;
+}
 
 Vec3& Vec3::operator=(const Vec3 &v) {
     if(this != &v){
@@ -183,4 +203,25 @@ Vec3& Vec3::operator-=(const Vec3 &v) {
    y -= v.y;
    z -= v.z;
    return *this;
+}
+
+bool Vec3::operator==(const Vec3 &v) {
+    if((x == v.x) && (y == v.y) && (z == v.z)) {
+        return true;
+    }
+    return false;
+}
+
+bool Vec3::operator>=(const Vec3 &v) {
+    if((x >= v.x) && (y >= v.y) && (z >= v.z)) {
+        return true;
+    }
+    return false;
+}
+
+bool Vec3::operator<=(const Vec3 &v) {
+    if((x <= v.x) && (y <= v.y) && (z <= v.z)) {
+        return true;
+    }
+    return false;
 }

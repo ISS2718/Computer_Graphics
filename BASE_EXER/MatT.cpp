@@ -28,6 +28,12 @@ GLfloat* MatT::getTransformationMatrix() {
     return (GLfloat*) transformation->getMatix();
 }
 
+void MatT::setRotation(const float &x, const float &y, const float &z) {
+    setRotationX(x);
+    setRotationY(y);
+    setRotationZ(z);
+}
+
 void MatT::setRotationX(const float &r) {
     float s = (float) sin(r);
     float c = (float) cos(r);
@@ -71,6 +77,22 @@ void MatT::setTranslation(const float &x, const float &y, const float &z) {
 
     update = true;
 }
+
+void MatT::setTranslationX(const float &x){
+    translation->setValuePosition(0, 3, x);
+    update = true;
+}
+
+void MatT::setTranslationY(const float &y){
+    translation->setValuePosition(1, 3, y);
+    update = true;
+}
+
+void MatT::setTranslationZ(const float &z){
+    translation->setValuePosition(2, 3, z);
+    update = true;
+}
+
 
 void MatT::setScale(const float &s) {
     scale->setValuePosition(0, 0, s);

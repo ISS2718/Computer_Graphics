@@ -38,6 +38,10 @@ class Vec3 {
         Vec3 operator-(const float &v);
         Vec3& operator-=(const float &v);
 
+        bool operator==(const float &v);
+        bool operator>=(const float &v);
+        bool operator<=(const float &v);
+
         Vec3& operator=(const Vec3 &v);
         Vec3 operator*(const Vec3 &v);
         Vec3& operator*=(const Vec3 &v);
@@ -47,6 +51,10 @@ class Vec3 {
         Vec3& operator+=(const Vec3 &v);
         Vec3 operator-(const Vec3 &v);
         Vec3& operator-=(const Vec3 &v);
+
+        bool operator==(const Vec3 &v);
+        bool operator>=(const Vec3 &v);
+        bool operator<=(const Vec3 &v);
 };
 
 #endif

@@ -10,10 +10,13 @@
 class MatT {
     private:
         Mat4* transformation;
+        
         Mat4* translation;
+
         Mat4* rotationX;
         Mat4* rotationY;
         Mat4* rotationZ;
+        
         Mat4* scale;
 
         bool update; 
@@ -24,10 +27,14 @@ class MatT {
         ~MatT();
 
         GLfloat* getTransformationMatrix();
+        void setRotation(const float &x, const float &y, const float &z);
         void setRotationX(const float &r);
         void setRotationY(const float &r);
         void setRotationZ(const float &r);
         void setTranslation(const float &x, const float &y, const float &z);
+        void setTranslationX(const float &x);
+        void setTranslationY(const float &y);
+        void setTranslationZ(const float &z);
         void setScale(const float &s);
         void setScale(const float &x, const float &y, const float &z);
 };

@@ -11,6 +11,62 @@ typedef struct{
     float x, y;
 } coordenadas;
 
+float t_x = 0.0f; 
+float t_y = 0.0f;
+
+float s = 1.0f;
+
+float angle = 0.0f;
+
+const float dislocation = 0.01f;
+const float rotation = 0.1f;
+const float scaletion = 0.1f;
+
+// funcao para processar eventos de teclado
+static void key_event(GLFWwindow* window, int key, int scancode, int action, int mods){
+    //printf("Pressionando tecla %d\n", key);
+
+    if(key==GLFW_KEY_RIGHT || key==GLFW_KEY_D) {
+        if(t_x <= 1) {
+            t_x += dislocation; // tecla para direita
+        } else {
+            t_x = -1;
+        }
+    }
+    if(key==GLFW_KEY_LEFT || key==GLFW_KEY_A) {
+        if(t_x >= -1) {
+            t_x -= dislocation; // tecla para esqueda
+        } else {
+            t_x = 1;
+        }
+    }
+
+    if(key==GLFW_KEY_UP || key==GLFW_KEY_W) {
+        if(t_y <= 1) {
+            t_y += dislocation; // tecla para cima
+        } else {
+            t_y = -1;
+        }
+    }
+    if(key==GLFW_KEY_DOWN || key==GLFW_KEY_S) {
+        if(t_y >= -1) {
+            t_y -= dislocation; // tecla para baixo
+        } else {
+            t_y = 1;
+        }
+    }
+
+    if(key==GLFW_KEY_Q) angle += rotation;
+    if(key==GLFW_KEY_E) angle -= rotation;
+
+    if(key==GLFW_KEY_Z) {
+        s += scaletion;
+    }
+    if(key==GLFW_KEY_X) {
+        s -= scaletion;
+    }
+}
+
 int main(void){
  
     // inicicializando o sistema de janelas
@@ -127,6 +183,10 @@ int main(void){
     GLint loc = glGetAttribLocation(program, "position");
     glEnableVertexAttribArray(loc);
     glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (void*) 0); // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glVertexAttribPointer.xhtml
+ 
+
+    // Associando nossa janela com eventos de teclado
+    glfwSetKeyCallback(window, key_event); // teclado
 
     // Exibindo nossa janela
     glfwShowWindow(window);
@@ -143,10 +203,12 @@ int main(void){
         glClearColor(1.0, 1.0, 1.0, 1.0);
 
         // atualizando matriz de translação
-        mat_transformation.setTranslation(0.2, -0.7, 0);
+        mat_transformation.setTranslation(t_x, t_y, 0);
+        // atualizando matriz de escala
+        mat_transformation.setScale(s);
 
         // atulizando matriz de rotação
-        mat_transformation.setRotationZ(0.5);
+        mat_transformation.setRotationZ(angle);
 
         // enviando a matriz de transformacao para a GPU, vertex shader, variavel mat_transformation
         loc = glGetUniformLocation(program, "mat_transformation");

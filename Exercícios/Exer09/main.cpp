@@ -8,7 +8,7 @@
 
 // variaveis globais
 typedef struct{
-    float x, y;
+    float x, y, z;
 } coordenadas;
 
 float t_x = 0.0f; 
@@ -69,7 +69,7 @@ static void key_event(GLFWwindow* window, int key, int scancode, int action, int
 
 int main(void){
  
-    // inicicializando o sistema de janelas
+    // inicicializando o sistema de\ janelas
     glfwInit();
 
     // deixando a janela invisivel, por enquanto
@@ -77,7 +77,7 @@ int main(void){
 
  
     // criando uma janela
-    GLFWwindow* window = glfwCreateWindow(800, 800, "Minha Janela", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(800, 800, "Cubo", NULL, NULL);
 
     
     // tornando a janela como principal 
@@ -90,11 +90,11 @@ int main(void){
 
     // GLSL para Vertex Shader
     const GLchar* vertex_code =
-    "attribute vec2 position;\n"
+    "attribute vec3 position;\n"
     "uniform mat4 mat_transformation;\n"
     "void main()\n"
     "{\n"
-    "    gl_Position = mat_transformation*vec4(position, 0.0, 1.0);\n"
+    "    gl_Position = mat_transformation * vec4(position, 1.0);\n"
     "}\n";
 
     // GLSL para Fragment Shader
@@ -102,7 +102,7 @@ int main(void){
     "uniform vec4 color;\n"
     "void main()\n"
     "{\n"
-    "    gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);\n"
+    "    gl_FragColor = color;\n"
     "}\n";
 
     // Requisitando slot para a GPU para nossos programas Vertex e Fragment Shaders
@@ -130,9 +130,11 @@ int main(void){
         glGetShaderInfoLog(vertex, infoLength, NULL, info);
 
         printf("Erro de compilacao no Vertex Shader.\n");
-        printf("--> %s\n", &info[0]);
+        printf("--> %s\n",&info);
 
     }
+
+    
 
     // Compilando o Fragment Shader e verificando erros
     glCompileShader(fragment);
@@ -150,7 +152,7 @@ int main(void){
         glGetShaderInfoLog(fragment, infoLength, NULL, info);
 
         printf("Erro de compilacao no Fragment Shader.\n");
-        printf("--> %s\n",&info[0]);
+        printf("--> %s\n",&info);
 
     }
 
@@ -164,10 +166,42 @@ int main(void){
  
 
     // Preparando dados para enviar a GPU
-    coordenadas vertices[3] = { // criando tres vertices e preenchendo
-        {  0.00f, +0.05f },
-        { -0.05f, -0.05f },
-        { +0.05f, -0.05f }
+    coordenadas vertices[24] = { // criando tres vertices e preenchendo
+        // Face 1 do Cubo
+        {-0.2f, -0.2f, +0.2f},
+        {+0.2f, -0.2f, +0.2f},
+        {-0.2f, +0.2f, +0.2f},
+        {+0.2f, +0.2f, +0.2f},
+
+        // Face 2 do Cubo
+        {+0.2f, -0.2f, +0.2f},
+        {+0.2f, -0.2f, -0.2f},         
+        {+0.2f, +0.2f, +0.2f},
+        {+0.2f, +0.2f, -0.2f},
+        
+        // Face 3 do Cubo
+        {+0.2f, -0.2f, -0.2f},
+        {-0.2f, -0.2f, -0.2f},            
+        {+0.2f, +0.2f, -0.2f},
+        {-0.2f, +0.2f, -0.2f},
+
+        // Face 4 do Cubo
+        {-0.2f, -0.2f, -0.2f},
+        {-0.2f, -0.2f, +0.2f},         
+        {-0.2f, +0.2f, -0.2f},
+        {-0.2f, +0.2f, +0.2f},
+
+        // Face 5 do Cubo
+        {-0.2f, -0.2f, -0.2f},
+        {+0.2f, -0.2f, -0.2f},         
+        {-0.2f, -0.2f, +0.2f},
+        {+0.2f, -0.2f, +0.2f},
+        
+        // Face 6 do Cubo
+        {-0.2f, +0.2f, +0.2f},
+        {+0.2f, +0.2f, +0.2f},           
+        {-0.2f, +0.2f, -0.2f},
+        {+0.2f, +0.2f, -0.2f}
     };
 
     GLuint buffer;
@@ -182,8 +216,10 @@ int main(void){
     // Associando variáveis do programa GLSL (Vertex Shaders) com nossos dados
     GLint loc = glGetAttribLocation(program, "position");
     glEnableVertexAttribArray(loc);
-    glVertexAttribPointer(loc, 2, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (void*) 0); // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glVertexAttribPointer.xhtml
+    glVertexAttribPointer(loc, 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (void*) 0); // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glVertexAttribPointer.xhtml
  
+    // Associando variávels do programa GLSL (Fragment Shader) para definir cores
+    GLint loc_color = glGetUniformLocation(program, "color");
 
     // Associando nossa janela com eventos de teclado
     glfwSetKeyCallback(window, key_event); // teclado
@@ -208,14 +244,34 @@ int main(void){
         mat_transformation.setScale(s);
 
         // atulizando matriz de rotação
+        mat_transformation.setRotationX(angle);
+        // atulizando matriz de rotação
+        mat_transformation.setRotationY(angle);
+        // atulizando matriz de rotação
         mat_transformation.setRotationZ(angle);
 
         // enviando a matriz de transformacao para a GPU, vertex shader, variavel mat_transformation
         loc = glGetUniformLocation(program, "mat_transformation");
         glUniformMatrix4fv(loc, 1, GL_TRUE, mat_transformation.getTransformationMatrix());
 
-	    //renderizando
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+	    glUniform4f(loc_color, 1.0, 0.0, 0.0, 1.0);// ### vermelho
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        
+        glUniform4f(loc_color, 0.0, 0.0, 1.0, 1.0);// ### azul
+        glDrawArrays(GL_TRIANGLE_STRIP, 4, 4);
+        
+        glUniform4f(loc_color, 0.0, 1.0, 0.0, 1.0);// ### verde
+        glDrawArrays(GL_TRIANGLE_STRIP, 8, 4);
+        
+        glUniform4f(loc_color, 1.0, 1.0, 0.0, 1.0);// ### amarela
+        glDrawArrays(GL_TRIANGLE_STRIP, 12, 4);
+        
+        
+        glUniform4f(loc_color, 0.5, 0.5, 0.5, 1.0);// ### cinza
+        glDrawArrays(GL_TRIANGLE_STRIP, 16, 4);
+        
+        glUniform4f(loc_color, 0.5, 0.0, 0.0, 1.0);// ### marrom
+        glDrawArrays(GL_TRIANGLE_STRIP, 20, 4);
  
         glfwSwapBuffers(window);
     }

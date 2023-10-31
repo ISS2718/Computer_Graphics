@@ -5,17 +5,17 @@
 #include <iostream>
 #include <iomanip>
 #include <vector>
+#include "stb_image.h"
 
 #include "MatT.h"
 #include "Vec2.h"
 #include "Vec3.h"
 #include "Vec4.h"
 #include "OBJ3D.h"
+#include "Shader.h"
 
-#include "stb_image.h"
-
-#define WAVEFRONT_PATH "./OBJ/obj/Skull.obj"
-#define TEXTURE_PATH "./OBJ/obj/textures/Skull.jpg"
+#define WAVEFRONT_PATH "./OBJ/obj/caixa.obj"
+#define TEXTURE_PATH "./OBJ/obj/textures/caixa.jpg"
 
 int main(void){
  
@@ -35,35 +35,26 @@ int main(void){
 
     // inicializando Glew (para lidar com funcoes OpenGL)
     GLint GlewInitResult = glewInit();
-    printf("GlewStatus: %s", glewGetErrorString(GlewInitResult));
-
-    // GLSL para Vertex Shader
-    const GLchar* vertex_code =
-        "attribute vec3 position;\n"
-        "attribute vec2 texture_coord;\n"
-        "varying vec2 out_texture;\n"
-        "uniform mat4 mat_transformation;\n"
-        "void main()\n"
-        "{\n"
-        "    gl_Position = mat_transformation*vec4(position, 1.0);\n"
-        "    out_texture = vec2(texture_coord);\n"
-        "}\n";
-
-    // GLSL para Fragment Shader
-    const GLchar* fragment_code =
-        "uniform vec4 color;\n"
-        "varying vec2 out_texture;\n"
-        "uniform sampler2D samplerTexture;\n"
-        "void main()\n"
-        "{\n"
-        "   vec4 texture = texture2D(samplerTexture, out_texture);\n"
-        "   gl_FragColor = texture;\n"
-        "}\n";
+    printf("GlewStatus: %s\n", glewGetErrorString(GlewInitResult));
 
     // Requisitando slot para a GPU para nossos programas Vertex e Fragment Shaders
     GLuint program = glCreateProgram();
     GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
     GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
+    
+    Shader s("./texture.vert", "./texture.frag");
+
+    if(s.loadVertexShader() != 0) {
+        std::cout << "Vertex Shader não encontrado" << std::endl;
+        return -1;
+    } 
+    const GLchar* vertex_code = (const GLchar*) s.getVertexShader();
+
+    if(s.loadFragmentShader() != 0) {
+        std::cout << "Vertex Shader não encontrado" << std::endl;
+        return -1;
+    } 
+    const GLchar* fragment_code = (const GLchar*) s.getFragmentShader();
 
     // Associando nosso código-fonte GLSL aos slots solicitados
     glShaderSource(vertex, 1, &vertex_code, NULL);
@@ -155,9 +146,8 @@ int main(void){
     std::vector<Vec3> vertices;
     std::vector<Vec3> normals;
     std::vector<Vec2> uvs;
-    OBJ3D obj(WAVEFRONT_PATH, GL_QUAD_STRIP);
-    int r = obj.loadOBJ3D_TRIANGLES(&vertices, &uvs, &normals);
-
+    OBJ3D obj1(WAVEFRONT_PATH, GL_TRIANGLES);
+    int r = obj1.loadOBJ3D_TRIANGLES(&vertices, &uvs, &normals);
     if(r == -1) {
         std::cout << "File not found!" << std::endl;
         return r;
@@ -168,6 +158,7 @@ int main(void){
         std::cout << "Is not render with quads" << std::endl;
         return r;
     }
+
     GLuint buffer[2];
     glGenBuffers(2, buffer);
 
@@ -199,7 +190,7 @@ int main(void){
     glEnable(GL_DEPTH_TEST);// ### importante para 3D
 
     float angulo = 0.0, angulo_inc = 0.0001; 
-    MatT mat_transformation;
+    MatT mt_obj1, mt_obj2, mt_obj3;
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -209,21 +200,51 @@ int main(void){
 
         angulo += angulo_inc;
 
-        mat_transformation.setScale(0.05);
-        mat_transformation.setTranslation(0, -0.5, 0);
+        mt_obj1.setScale(0.05);
+        mt_obj1.setTranslation(0.5, 0, 0);
 
-        mat_transformation.setRotationX(angulo);
-        mat_transformation.setRotationY(M_PI/2);
-        mat_transformation.setRotationZ(M_PI/2);
+        mt_obj1.setRotationX(angulo);
+        // mt_obj1.setRotationY(M_PI/2);
+        // mt_obj1.setRotationZ(M_PI/2);
 
         // enviando a matriz de transformacao para a GPU
         GLuint loc_mat_transformation = glGetUniformLocation(program, "mat_transformation");
-        glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mat_transformation.getTransformationMatrix());
+        glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj1.getTransformationMatrix());
 
         // glActiveTexture(textureID);
         glBindTexture(GL_TEXTURE_2D, textureID);
-        glDrawArrays(obj.getTypeRender(), 0, vertices.size());
- 
+        glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getNormalsEnd());
+
+        mt_obj2.setScale(0.1);
+        mt_obj2.setTranslation(-0.5, 0, 0);
+
+        // mt_obj2.setRotationX(angulo);
+        mt_obj2.setRotationY(angulo);
+        // mt_obj2.setRotationZ(angulo);
+
+        loc_mat_transformation = glGetUniformLocation(program, "mat_transformation");
+        glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj2.getTransformationMatrix());
+
+        // glActiveTexture(textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getNormalsEnd());
+
+
+        mt_obj3.setScale(0.3);
+        mt_obj3.setTranslation(0, 0, 0);
+
+        // mat_transformation.setRotationX(angulo);
+        // mat_transformation.setRotationY(angulo);
+        mt_obj3.setRotationZ(angulo);
+
+        loc_mat_transformation = glGetUniformLocation(program, "mat_transformation");
+        glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj3.getTransformationMatrix());
+
+        // glActiveTexture(textureID);
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getNormalsEnd());
+
+
         glfwSwapBuffers(window);   
     }
  
