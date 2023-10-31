@@ -270,7 +270,7 @@ int main(void){
 
     // Criando as texturas;
     OBJ3D objetos[5] {
-        OBJ3D("./cubo/RumikCube.obj", GL_QUADS),
+        OBJ3D("./objetos/RumikCube.obj", GL_QUADS),
         OBJ3D("./objetos/cabana.obj", GL_TRIANGLES),
         OBJ3D("./objetos/monstro.obj", GL_TRIANGLES),
         OBJ3D("./objetos/torre.obj", GL_TRIANGLES),
