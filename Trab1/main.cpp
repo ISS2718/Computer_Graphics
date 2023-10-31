@@ -382,12 +382,10 @@ int main(void){
         
         if(mag_change && mag_change != mag_change_update) {
             texturas[select_obj].setMagFilterType(GL_NEAREST).updateTextureParamters();
-            std::cout<<"troquei pra NEARST!\n";
             mag_change_update = mag_change;
         } else if(!mag_change && mag_change != mag_change_update) {
             texturas[select_obj].setMagFilterType(GL_LINEAR).updateTextureParamters();
             mag_change_update = mag_change;
-            std::cout<<"troquei pra LINEAR!\n";
         }
 
         if(texture_view) {

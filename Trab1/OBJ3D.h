@@ -13,7 +13,7 @@
 #include "Vec2.h"
 #include "Vec3.h"
 
-#define SIZE_LINE 25 /**< Tamanho máximo da linha a ser lida a partir de arquivos durante o processamento do formato .obj. */
+#define SIZE_LINE 256 /**< Tamanho máximo da linha a ser lida a partir de arquivos durante o processamento do formato .obj. */
 
 /**
  * @class OBJ3D
