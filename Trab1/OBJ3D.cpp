@@ -293,29 +293,3 @@ void OBJ3D::updateMaxMinCoordinates(float x, float y, float z) {
         min_vertex_coordinates.setX(z);
     }
 }
-
-OBJ3D& OBJ3D::operator=(OBJ3D& v) {
-    if((this->obj_path == nullptr) && (v.obj_path != nullptr)) {
-        this->obj_path = new std::string(*v.obj_path);   
-    } else if((this->obj_path != nullptr) && (v.obj_path == nullptr)) {
-        delete this->obj_path;
-    } else if((this->obj_path != nullptr) && (v.obj_path != nullptr)) {
-        this->obj_path->assign(*v.obj_path);
-    }
-
-    this->vertex_start = v.vertex_start; 
-    this->vertex_end = v.vertex_end;
-    this->vertex_size = v.vertex_size;
-
-    this->uvs_start = v.uvs_start; 
-    this->uvs_end = v.uvs_end;
-    this->uvs_size = v.uvs_size;
-
-    this->normals_start = v.normals_start; 
-    this->normals_end = v.normals_end;
-    this->normals_size = v.normals_size; 
-
-    this->type_render = v.type_render;
-
-    return *this;
-}

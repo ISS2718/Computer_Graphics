@@ -31,7 +31,7 @@ Shader& Shader::setFragmentShader(std::string vertex_shader_path) {
     return *this;
 }
 
-char* Shader::compileVertexShadder() {
+char* Shader::compileVertexShader() {
     glCompileShader(vertex_shader_ID);
     GLint r;
     glGetShaderiv(vertex_shader_ID, GL_COMPILE_STATUS, &r);
@@ -51,7 +51,7 @@ char* Shader::compileVertexShadder() {
     return nullptr;
 }
 
-char* Shader::compileFragmentShadder() {
+char* Shader::compileFragmentShader() {
     glCompileShader(fragment_shader_ID);
     GLint r;
     glGetShaderiv(fragment_shader_ID, GL_COMPILE_STATUS, &r);
@@ -99,7 +99,7 @@ int Shader::loadFragmentShader() {
     return 0;
 }
 
-int Shader::loadShader(std::string &path,  std::string *shader) {
+int Shader::loadShader(const std::string &path,  std::string *shader) {
     std::ifstream file(path, std::ifstream::in);
 
     if(!file.is_open()) {

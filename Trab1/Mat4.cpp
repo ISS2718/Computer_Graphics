@@ -22,7 +22,7 @@ Mat4::~Mat4() {
     delete[] this->matrix;
 }
 
-float* Mat4::getMatix() {
+float* Mat4::getMatrix() {
     return matrix;
 }
 

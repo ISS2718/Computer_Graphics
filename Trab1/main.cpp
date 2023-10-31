@@ -1,4 +1,4 @@
-#include <GL/glew.h>  
+#include <GL/glew.h>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -23,13 +23,15 @@
 
 
 int select_obj = 0;
-bool mag_change = false, texture_view = true, 
-    uping = false, righting = false, 
-    downing = false, lefting = false,
-    rotate_x_up = false, rotate_y_up = false, rotate_z_up = false,
-    rotate_x_down = false, rotate_y_down = false, rotate_z_down = false,
-    scale_update = false;
-float scale = 0;
+
+
+bool mag_change = false, texture_view = true;
+bool scale_up = false, scale_down = false;
+bool uping = false, righting = false;
+bool downing = false, lefting = false;
+bool rotate_x_up = false, rotate_y_up = false, rotate_z_up = false;
+bool rotate_x_down = false, rotate_y_down = false, rotate_z_down = false;
+    
 
 // funcao para processar eventos de teclado
 static void key_event(GLFWwindow* window, int key, int scancode, int action, int mods){
@@ -102,13 +104,11 @@ static void key_event(GLFWwindow* window, int key, int scancode, int action, int
     }
 
     if(key == GLFW_KEY_Z && action == GLFW_PRESS) {
-        scale = +INC_SCALE;
-        scale_update = true;
+        scale_up = true;
     }
 
     if(key == GLFW_KEY_X && action == GLFW_PRESS) {
-        scale = -INC_SCALE;
-        scale_update = true;
+        scale_down = true;
     }
 }
 
@@ -154,20 +154,37 @@ void verifyAndMakeMov(OBJ3D &obj, MatT *mt_obj, Vec3 *actual_coordiante, float s
     }
 }
 
-void verifyAndMakeScale(OBJ3D &obj, MatT *mt_obj, float *actual_scale, float scale) {
-    if(scale_update) {
-        Vec3 max = obj.getMaxVertexCoordinates();
-        max *= scale;
-        Vec3 min = obj.getMinVertexCoordinates();
-        min *= scale;
+void verifyAndMakeScale(OBJ3D &obj, MatT *mt_obj, float *actual_scale) {
+    Vec3 max = obj.getMaxVertexCoordinates();
+    Vec3 min = obj.getMinVertexCoordinates();
+    if(scale_up) {
+        max *= (*actual_scale + INC_SCALE);
+        min *= (*actual_scale + INC_SCALE);
 
-        if(((max.getX() > -1) && (max.getX() < 1)) && ((min.getX() < 1) && (min.getX() > -1))) {
-            if(((max.getX() > -1) && (max.getX() < 1)) && ((min.getX() < 1) && (min.getX() > -1))) {
-                *actual_scale = scale;
+        if(((max.getX() >= -1) && (max.getX() <= 1)) && ((min.getX() <= 1) && (min.getX() >= -1))) {
+            if(((max.getY() >= -1) && (max.getY() <= 1)) && ((min.getY() <= 1) && (min.getY() >= -1))) {
+                *actual_scale += INC_SCALE;
                 mt_obj->setScale(*actual_scale);
             }  
         }    
-        scale_update = false;
+        scale_up = false;
+    }
+
+    if(scale_down) {
+        float scale = (*actual_scale - INC_SCALE);
+        if(scale <= 0) {
+            scale = 0;
+        }
+        max *= scale;
+        min *= scale;
+
+        if(((max.getX() >= -1) && (max.getX() <= 1)) && ((min.getX() <= 1) && (min.getX() >= -1))) {
+            if(((max.getY() >= -1) && (max.getY() <= 1)) && ((min.getY() <= 1) && (min.getY() >= -1))) {
+                *actual_scale = scale;
+                mt_obj->setScale(scale);
+            }  
+        }    
+        scale_down = false;
     }
 }
 
@@ -185,13 +202,13 @@ void verifyAndMakeRotate(OBJ3D &obj, MatT *mt_obj, Vec3 *actual_angle) {
     }
 
     if(rotate_y_up) {
-        actual_angle->setY(actual_angle->getY() + ANGLE_INC);
+        actual_angle->setY(actual_angle->getY() - ANGLE_INC);
         mt_obj->setRotationY(actual_angle->getY());
          rotate_y_up = false;
     }
 
     if(rotate_y_down) {
-        actual_angle->setY(actual_angle->getY() - ANGLE_INC);
+        actual_angle->setY(actual_angle->getY() + ANGLE_INC);
         mt_obj->setRotationY(actual_angle->getY());
         rotate_y_down = false;
     }
@@ -233,7 +250,6 @@ int main(void){
     GLuint program = glCreateProgram();
     
     Shader s("./texture.vert", "./texture.frag");
-
     // Carregando Vertex Shadder
     if(s.loadVertexShader() != 0) {
         std::cout << "Vertex Shader não encontrado" << std::endl;
@@ -241,7 +257,7 @@ int main(void){
     }
 
     // Compilando o Vertex Shader e verificando erros
-    char *info = s.compileVertexShadder();
+    char *info = s.compileVertexShader();
     if(info != nullptr) {
         std::cout << "Erro de compilacao no Vertex Shader." << std::endl;
         std::cout<< "\t--> " << info << std::endl;
@@ -254,7 +270,7 @@ int main(void){
     }
 
     // Compilando o Fragment Shader e verificando erros
-    info = s.compileFragmentShadder();
+    info = s.compileFragmentShader();
     if(info != nullptr) {
         std::cout << "Erro de compilacao no Fragment Shader." << std::endl;
         std::cout<< "\t--> " << info << std::endl;
@@ -267,15 +283,6 @@ int main(void){
     // Linkagem do programa e definindo como default
     glLinkProgram(program);
     glUseProgram(program);
-
-    // Criando as texturas;
-    OBJ3D objetos[5] {
-        OBJ3D("./cubo/RumikCube.obj", GL_QUADS),
-        OBJ3D("./objetos/cabana.obj", GL_TRIANGLES),
-        OBJ3D("./objetos/monstro.obj", GL_TRIANGLES),
-        OBJ3D("./objetos/torre.obj", GL_TRIANGLES),
-        OBJ3D("./objetos/cranio.obj", GL_TRIANGLES),
-    };
 
     // Criando as texturas;
     Texture texturas[5] {
@@ -301,6 +308,15 @@ int main(void){
         }
     }
 
+    // Criando as objetos;
+    OBJ3D objetos[5] {
+        OBJ3D("./objetos/RumikCube.obj", GL_QUADS),
+        OBJ3D("./objetos/cabana.obj", GL_TRIANGLES),
+        OBJ3D("./objetos/monstro.obj", GL_TRIANGLES),
+        OBJ3D("./objetos/torre.obj", GL_TRIANGLES),
+        OBJ3D("./objetos/cranio.obj", GL_TRIANGLES),
+    };
+
     // Preparando dados para enviar a GPU
     std::vector<Vec3> vertices;
     std::vector<Vec3> normals;
@@ -320,6 +336,7 @@ int main(void){
             return r;
         }
     }
+    std::cout<<"to aqui\n";
 
     GLuint buffer[2];
     glGenBuffers(2, buffer);
@@ -371,7 +388,7 @@ int main(void){
         glClearColor(1.0, 1.0, 1.0, 1.0);
 
       
-        verifyAndMakeScale(objetos[select_obj], &mt_obj[select_obj], &scale_obj[select_obj], (scale_obj[select_obj] + scale));
+        verifyAndMakeScale(objetos[select_obj], &mt_obj[select_obj], &scale_obj[select_obj]);
 
         verifyAndMakeMov(objetos[select_obj], &mt_obj[select_obj], &coord_obj[select_obj], scale_obj[select_obj]);
         verifyAndMakeRotate(objetos[select_obj], &mt_obj[select_obj], &angle_obj[select_obj]);
@@ -382,18 +399,18 @@ int main(void){
         
         if(mag_change && mag_change != mag_change_update) {
             texturas[select_obj].setMagFilterType(GL_NEAREST).updateTextureParamters();
-            std::cout<<"troquei pra NEARST!\n";
             mag_change_update = mag_change;
         } else if(!mag_change && mag_change != mag_change_update) {
             texturas[select_obj].setMagFilterType(GL_LINEAR).updateTextureParamters();
             mag_change_update = mag_change;
-            std::cout<<"troquei pra LINEAR!\n";
         }
 
         if(texture_view) {
             glBindTexture(GL_TEXTURE_2D, texturas[select_obj].getTextureID());
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
         } else {
             glBindTexture(GL_TEXTURE_2D, 0);
+            glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
         }
             
         glDrawArrays(objetos[select_obj].getTypeRender(), objetos[select_obj].getVertexStart(), objetos[select_obj].getVertexSize());
