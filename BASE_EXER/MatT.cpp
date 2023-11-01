@@ -25,13 +25,13 @@ GLfloat* MatT::getTransformationMatrix() {
         updateTransformationMatrix();
     }
 
-    return (GLfloat*) transformation->getMatix();
+    return (GLfloat*) transformation->getMatrix();
 }
 
-void MatT::setRotation(const float &x, const float &y, const float &z) {
-    setRotationX(x);
-    setRotationY(y);
-    setRotationZ(z);
+void MatT::setRotation(const float &rx, const float &ry, const float &rz) {
+    setRotationX(rx);
+    setRotationY(ry);
+    setRotationZ(rz);
 }
 
 void MatT::setRotationX(const float &r) {
@@ -102,10 +102,10 @@ void MatT::setScale(const float &s) {
     update = true;
 }
 
-void MatT::setScale(const float &x, const float &y, const float &z) {
-    scale->setValuePosition(0, 0, x);
-    scale->setValuePosition(1, 1, y);
-    scale->setValuePosition(2, 2, z);
+void MatT::setScale(const float &sx, const float &sy, const float &sz) {
+    scale->setValuePosition(0, 0, sx);
+    scale->setValuePosition(1, 1, sy);
+    scale->setValuePosition(2, 2, sz);
 
     update = true;
 }

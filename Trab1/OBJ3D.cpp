@@ -126,8 +126,8 @@ OBJ3D& OBJ3D::setTypeObjPath(std::string obj_path) {
 }
 
 int OBJ3D::loadOBJ3D(std::vector<Vec3> *out_vertex, std::vector<Vec2> *out_uvs, std::vector<Vec3> *out_normals) {
-        std::ifstream file(*obj_path, std::ifstream::in);
-    
+    std::cout << obj_path->c_str() << "\n";
+    std::ifstream file(*obj_path, std::ifstream::in);
     if(!file.is_open()) {
         return -1;
     }
@@ -292,4 +292,39 @@ void OBJ3D::updateMaxMinCoordinates(float x, float y, float z) {
     if(z < min_vertex_coordinates.getZ()) {
         min_vertex_coordinates.setX(z);
     }
+}
+
+OBJ3D& OBJ3D::operator=(const OBJ3D& v) {
+    // Verifica se é uma autoatribuição
+    if (this == &v) {
+        return *this;
+    }
+
+    // Libera recursos alocados no objeto atual
+    if (this->obj_path != nullptr) {
+        delete this->obj_path;
+    }
+
+    // Realiza a cópia dos membros
+    if (v.obj_path != nullptr) {
+        this->obj_path = new std::string(*v.obj_path);
+    } else {
+        this->obj_path = nullptr;
+    }
+
+    this->vertex_start = v.vertex_start; 
+    this->vertex_end = v.vertex_end;
+    this->vertex_size = v.vertex_size;
+
+    this->uvs_start = v.uvs_start; 
+    this->uvs_end = v.uvs_end;
+    this->uvs_size = v.uvs_size;
+
+    this->normals_start = v.normals_start; 
+    this->normals_end = v.normals_end;
+    this->normals_size = v.normals_size; 
+
+    this->type_render = v.type_render;
+
+    return *this;
 }
