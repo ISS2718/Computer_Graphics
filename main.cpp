@@ -1,18 +1,23 @@
 #include <GL/glew.h>  
 
 #define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h> /* verifique no seu SO onde fica o glfw3.h */
+#include <GLFW/glfw3.h>
 #include <iostream>
 #include <iomanip>
+#include <string>
 #include <vector>
+#include <time.h>
+
 #include "stb_image.h"
 
 #include "MatT.h"
+#include "OBJ3D.h"
+#include "Render.h"
+#include "Shader.h"
+#include "Texture.h"
 #include "Vec2.h"
 #include "Vec3.h"
 #include "Vec4.h"
-#include "OBJ3D.h"
-#include "Shader.h"
 
 #define WAVEFRONT_PATH "./OBJ/obj/caixa.obj"
 #define TEXTURE_PATH "./OBJ/obj/textures/caixa.jpg"
@@ -39,115 +44,62 @@ int main(void){
 
     // Requisitando slot para a GPU para nossos programas Vertex e Fragment Shaders
     GLuint program = glCreateProgram();
-    GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
-    GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
     
     Shader s("./texture.vert", "./texture.frag");
 
+    // Carregando Vertex Shadder
     if(s.loadVertexShader() != 0) {
         std::cout << "Vertex Shader não encontrado" << std::endl;
-        return -1;
-    } 
-    const GLchar* vertex_code = (const GLchar*) s.getVertexShader();
-
-    if(s.loadFragmentShader() != 0) {
-        std::cout << "Vertex Shader não encontrado" << std::endl;
-        return -1;
-    } 
-    const GLchar* fragment_code = (const GLchar*) s.getFragmentShader();
-
-    // Associando nosso código-fonte GLSL aos slots solicitados
-    glShaderSource(vertex, 1, &vertex_code, NULL);
-    glShaderSource(fragment, 1, &fragment_code, NULL);
-
-    // Compilando o Vertex Shader e verificando erros
-    glCompileShader(vertex);
-
-    GLint isCompiled = 0;
-    glGetShaderiv(vertex, GL_COMPILE_STATUS, &isCompiled);
-    if(isCompiled == GL_FALSE){
-
-        //descobrindo o tamanho do log de erro
-        int infoLength = 512;
-        glGetShaderiv(vertex, GL_INFO_LOG_LENGTH, &infoLength);
-
-        //recuperando o log de erro e imprimindo na tela
-        char info[infoLength];
-        glGetShaderInfoLog(vertex, infoLength, NULL, info);
-
-        printf("Erro de compilacao no Vertex Shader.\n");
-        printf("--> %s\n", info);
-
+        exit(EXIT_FAILURE);
     }
 
-    
+    // Compilando o Vertex Shader e verificando erros
+    char *info = s.compileVertexShader();
+    if(info != nullptr) {
+        std::cout << "Erro de compilacao no Vertex Shader." << std::endl;
+        std::cout<< "\t--> " << info << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    // Carregando Fragment Shadder
+    if(s.loadFragmentShader() != 0) {
+        std::cout << "Vertex Shader não encontrado" << std::endl;
+        exit(EXIT_FAILURE);
+    }
 
     // Compilando o Fragment Shader e verificando erros
-    glCompileShader(fragment);
-
-    isCompiled = 0;
-    glGetShaderiv(fragment, GL_COMPILE_STATUS, &isCompiled);
-    if(isCompiled == GL_FALSE){
-
-        //descobrindo o tamanho do log de erro
-        int infoLength = 512;
-        glGetShaderiv(fragment, GL_INFO_LOG_LENGTH, &infoLength);
-
-        //recuperando o log de erro e imprimindo na tela
-        char info[infoLength];
-        glGetShaderInfoLog(fragment, infoLength, NULL, info);
-
-        printf("Erro de compilacao no Fragment Shader.\n");
-        printf("--> %s\n", info);
-
+    info = s.compileFragmentShader();
+    if(info != nullptr) {
+        std::cout << "Erro de compilacao no Fragment Shader." << std::endl;
+        std::cout<< "\t--> " << info << std::endl;
+        exit(EXIT_FAILURE);
     }
 
     // Associando os programas compilado ao programa principal
-    glAttachShader(program, vertex);
-    glAttachShader(program, fragment);
+    glAttachShader(program, s.getVertexShaderID());
+    glAttachShader(program, s.getFragmentShaderID());
 
     // Linkagem do programa e definindo como default
     glLinkProgram(program);
     glUseProgram(program);
     
-    // Create one OpenGL texture
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-
-    std::cout << "Texture ID: " << textureID << std::endl;
-
-    // "Bind" the newly created texture : all future texture functions will modify this texture
-    glBindTexture(GL_TEXTURE_2D, textureID);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char *data = stbi_load(TEXTURE_PATH, &width, &height, &nrChannels, 0);
-
-    if(data == nullptr) {
-        std::cout << "A imagem não foi carregada" << std::endl;
-    } else {
-        std::cout << "Altura: " << height << ", Largura: " << width << ", Num.Chanels: " << nrChannels << std::endl;
-        // Give the image to OpenGL
-        if(nrChannels == 4) {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-        } else if(nrChannels == 3) {
-             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        }
-        stbi_image_free(data);
+    Texture txture(TEXTURE_PATH, GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
+    int r = txture.loadTexture();
+    if(r == -1) {
+        std::cout << "Textura " << TEXTURE_PATH << ": texture_path é nulo!!!" << std::endl;
+        exit(EXIT_FAILURE);
+    } else if(r == -2) {
+        std::cout << "Textura " << TEXTURE_PATH << ": Não foi possível carregar imgaem!!!" << std::endl;
+        exit(EXIT_FAILURE);
     }
 
     // Preparando dados para enviar a GPU
     std::vector<Vec3> vertices;
     std::vector<Vec3> normals;
     std::vector<Vec2> uvs;
+    
     OBJ3D obj1(WAVEFRONT_PATH, GL_TRIANGLES);
-    int r = obj1.loadOBJ3D_TRIANGLES(&vertices, &uvs, &normals);
+    r = obj1.loadOBJ3D(&vertices, &uvs, &normals);
     if(r == -1) {
         std::cout << "File not found!" << std::endl;
         return r;
@@ -212,7 +164,7 @@ int main(void){
         glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj1.getTransformationMatrix());
 
         // glActiveTexture(textureID);
-        glBindTexture(GL_TEXTURE_2D, textureID);
+        glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
         glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getNormalsEnd());
 
         mt_obj2.setScale(0.1);
@@ -226,7 +178,7 @@ int main(void){
         glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj2.getTransformationMatrix());
 
         // glActiveTexture(textureID);
-        glBindTexture(GL_TEXTURE_2D, textureID);
+        glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
         glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getNormalsEnd());
 
 
@@ -241,7 +193,7 @@ int main(void){
         glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj3.getTransformationMatrix());
 
         // glActiveTexture(textureID);
-        glBindTexture(GL_TEXTURE_2D, textureID);
+        glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
         glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getNormalsEnd());
 
 

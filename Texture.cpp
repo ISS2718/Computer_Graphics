@@ -1,6 +1,6 @@
 #include "Texture.h"
 
-Texture::Texture(std::string texture_path, GLint &mag_filter_type, GLint &min_filter_type, GLint &wrap_s_type, GLint &wrap_t_type) {
+Texture::Texture(std::string texture_path, GLint mag_filter_type, GLint min_filter_type, GLint wrap_s_type, GLint wrap_t_type) {
     this->texture_path = new std::string(texture_path);
     this->textureID = -1;
 

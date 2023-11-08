@@ -126,8 +126,8 @@ OBJ3D& OBJ3D::setTypeObjPath(std::string obj_path) {
 }
 
 int OBJ3D::loadOBJ3D(std::vector<Vec3> *out_vertex, std::vector<Vec2> *out_uvs, std::vector<Vec3> *out_normals) {
+    std::cout << obj_path->c_str() << "\n";
     std::ifstream file(*obj_path, std::ifstream::in);
-    
     if(!file.is_open()) {
         return -1;
     }

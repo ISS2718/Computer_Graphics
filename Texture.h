@@ -31,7 +31,7 @@ class Texture {
          * @param wrap_s_type Tipo de envolvimento da textura no eixo S.
          * @param wrap_t_type Tipo de envolvimento da textura no eixo T.
          */
-        Texture(std::string texture_path, GLint &mag_filter_type, GLint &min_filter_type, GLint &wrap_s_type, GLint &wrap_t_type);
+        Texture(std::string texture_path, GLint mag_filter_type, GLint min_filter_type, GLint wrap_s_type, GLint wrap_t_type);
 
         /** 
          * Construtor da classe Texture que permite especificar apenas o caminho da textura.
