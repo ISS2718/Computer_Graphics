@@ -18,7 +18,6 @@
 #include "Vec3.h"
 #include "Vec4.h"
 
-
 int main(void){
     // Vetores para enviar dados para enviar a GPU
     std::vector<Vec3> vertices;
@@ -28,8 +27,8 @@ int main(void){
     // Criando as objetos
     OBJ3D objetos[5] {
         OBJ3D("./objetos/RumikCube.obj", GL_QUADS),
-        OBJ3D("./objetos/cabana.obj", GL_TRIANGLES),
-        OBJ3D("./objetos/monstro.obj", GL_TRIANGLES),
+        OBJ3D("./objetos/casa.obj", GL_TRIANGLES),
+        OBJ3D("./objetos/espada.obj", GL_QUADS),
         OBJ3D("./objetos/torre.obj", GL_TRIANGLES),
         OBJ3D("./objetos/cranio.obj", GL_TRIANGLES),
     };
@@ -37,14 +36,14 @@ int main(void){
     // Criando as texturas
     Texture texturas[5] {
         Texture("./objetos/RumikCubeTexture.jpg"),
-        Texture("./objetos/cabana.jpg"),
-        Texture("./objetos/monstro.jpg"),
+        Texture("./objetos/casa.png"),
+        Texture("./objetos/espada.png"),
         Texture("./objetos/torre.jpg"),
         Texture("./objetos/cranio.jpg"),
     };
 
     // Criando escala iniciais dos objetos
-    float scale_obj[5] = {0.05, 0.01, 0.1, 0.1, 0.03};
+    float scale_obj[5] = {0.05, 0.1, 0.02, 0.1, 0.03};
     // criando coordenadas iniciais dos objetos
     Vec3 coord_obj[5] = {Vec3(0), Vec3(0), Vec3(0), Vec3(0), Vec3(0)};
     // criando angulos iniciais dos objetos
