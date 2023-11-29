@@ -22,7 +22,9 @@ Para limpar executar na pasta raiz
 
 ``` $ make clean```
 
-# Dependências
+## Dependências
 
-* glew
-* glfw3
+* [glew](https://github.com/nigels-com/glew)
+* [glfw3](https://github.com/glfw/glfw)
+* [stb_image](https://github.com/nothings/stb/blob/master/stb_image.h)
+    * Essa biblioteca é apena um arquivo e ela **JÁ ESTÁ INCLUSA** no projeto base!
