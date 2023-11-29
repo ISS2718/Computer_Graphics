@@ -22,7 +22,7 @@ Para limpar executar na pasta raiz
 
 ``` $ make clean```
 
-## Dependências
+# Dependências
 
 * [glew](https://github.com/nigels-com/glew)
 * [glfw3](https://github.com/glfw/glfw)
