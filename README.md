@@ -4,7 +4,7 @@ Repositório feito para a disciplina de Computação Gráfica (SCC0650), leciona
 
 ## Organização do Repositório
 
-Este Repositório está organizado em 6-Branchs principais, além de outras de teste (se houver mais).
+Este Repositório está organizado em 5-Branchs principais, além de outras de teste (se houver mais).
 
 ### Main (**Essa aqui!**)
 
