@@ -25,6 +25,8 @@ DBFLAGS := -Wall -g3
 SRCS := $(wildcard *.cpp)
 OBJS := $(patsubst %.cpp,$(OBJDIR)/%.$(OBJ_EXT),$(SRCS))
 
+all: release run
+
 run: $(OUTDIR)/$(OUTFILE)
 	$(OUTDIR)/$(OUTFILE)
 
