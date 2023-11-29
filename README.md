@@ -15,3 +15,8 @@ Para executar os Exercícos dentro de pastas "sepradas", abra o terminal dentro 
 ``` $ make release```
 
 ``` $ make run```
+
+## Dependências
+
+* [glew](https://github.com/nigels-com/glew)
+* [glfw3](https://github.com/glfw/glfw)
