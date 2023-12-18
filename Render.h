@@ -12,7 +12,7 @@
 
 #include "stb_image.h"
 
-#include "MatT.h"
+#include "MatModel.h"
 #include "OBJ3D.h"
 #include "Shader.h"
 #include "Texture.h"
@@ -34,7 +34,7 @@
  * @param mt_obj Matriz de transformação do objeto.
  * @param actual_coordiante Coordenadas atuais do objeto.
  */
-void verifyAndMakeMov(OBJ3D &obj, MatT *mt_obj, Vec3 *actual_coordiante);
+void verifyAndMakeMov(OBJ3D &obj, MatModel *mt_obj, Vec3 *actual_coordiante);
 
 /**
  * Verifica se pode/deve ser realizada modificações na escalas em um objeto 3D.
@@ -44,7 +44,7 @@ void verifyAndMakeMov(OBJ3D &obj, MatT *mt_obj, Vec3 *actual_coordiante);
  * @param mt_obj Matriz de transformação do objeto.
  * @param actual_scale Escala atual do objeto.
  */
-void verifyAndMakeScale(OBJ3D &obj, MatT *mt_obj, float *actual_scale);
+void verifyAndMakeScale(OBJ3D &obj, MatModel *mt_obj, float *actual_scale);
 
 /**
  * Verifica se pode/deve ser realizada rotações em um objeto 3D.
@@ -54,7 +54,7 @@ void verifyAndMakeScale(OBJ3D &obj, MatT *mt_obj, float *actual_scale);
  * @param mt_obj Matriz de transformação do objeto.
  * @param actual_angle Ângulos atuais do objeto.
  */
-void verifyAndMakeRotate(OBJ3D &obj, MatT *mt_obj, Vec3 *actual_angle);
+void verifyAndMakeRotate(OBJ3D &obj, MatModel *mt_obj, Vec3 *actual_angle);
 
 /**
  * Verifica se deve modificar a textura.
@@ -101,6 +101,6 @@ int loadObjectAndTexture(OBJ3D *objetos, Texture *texturas, std::vector<Vec3> *v
  * @param coord_obj Array de coordenadas dos objetos.
  * @param angle_obj Array de ângulos dos objetos.
  */
-void renderLoop(GLFWwindow *window, GLint *program, OBJ3D *objetos, Texture *texturas, MatT *mt_obj, float *scale_obj, Vec3 *coord_obj, Vec3 *angle_obj);
+void renderLoop(GLFWwindow *window, GLint *program, OBJ3D *objetos, Texture *texturas, MatModel *mt_obj, float *scale_obj, Vec3 *coord_obj, Vec3 *angle_obj);
 
 #endif

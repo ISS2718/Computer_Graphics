@@ -1,5 +1,5 @@
-#ifndef __MAT_T__
-#define __MAT_T__
+#ifndef __MAT_MODEL__
+#define __MAT_MODEL__
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -8,10 +8,10 @@
 #include "Mat4.h"
 
 /**
- * @class MatT
+ * @class MatModel
  * @brief Representa uma classe de matrizes de transformações para objetos 2D/3D.
  */
-class MatT {
+class MatModel {
 private:
     Mat4* transformation; /**< Matriz de transformação final (multiplicação de todas). */
     Mat4* translation; /**< Matriz de translação. */
@@ -29,14 +29,14 @@ private:
 
 public:
     /**
-     * Construtor da classe MatT. Inicializa as matrizes de transformação como matrizes identidade.
+     * Construtor da classe MatModel. Inicializa as matrizes de transformação como matrizes identidade.
      */
-    MatT();
+    MatModel();
 
     /**
-     * Destrutor da classe MatT. Libera a memória alocada para as matrizes de transformação.
+     * Destrutor da classe MatModel. Libera a memória alocada para as matrizes de transformação.
      */
-    ~MatT();
+    ~MatModel();
 
     /**
      * Obtém a matriz de transformação resultante.

@@ -1,6 +1,6 @@
-#include "MatT.h"
+#include "MatModel.h"
 
-MatT::MatT() {
+MatModel::MatModel() {
     transformation = new Mat4(true);
     translation =  new Mat4(true);
     rotationX =  new Mat4(true);
@@ -11,7 +11,7 @@ MatT::MatT() {
     update = false;
 }
 
-MatT::~MatT() {
+MatModel::~MatModel() {
     delete transformation;
     delete translation;
     delete rotationX;
@@ -20,7 +20,7 @@ MatT::~MatT() {
     delete scale;
 }
 
-GLfloat* MatT::getTransformationMatrix() {
+GLfloat* MatModel::getTransformationMatrix() {
     if(update) {
         updateTransformationMatrix();
     }
@@ -28,13 +28,13 @@ GLfloat* MatT::getTransformationMatrix() {
     return (GLfloat*) transformation->getMatrix();
 }
 
-void MatT::setRotation(const float &rx, const float &ry, const float &rz) {
+void MatModel::setRotation(const float &rx, const float &ry, const float &rz) {
     setRotationX(rx);
     setRotationY(ry);
     setRotationZ(rz);
 }
 
-void MatT::setRotationX(const float &r) {
+void MatModel::setRotationX(const float &r) {
     float s = (float) sin(r);
     float c = (float) cos(r);
 
@@ -46,7 +46,7 @@ void MatT::setRotationX(const float &r) {
     update = true;
 }
 
-void MatT::setRotationY(const float &r) {
+void MatModel::setRotationY(const float &r) {
     float s = (float) sin(r);
     float c = (float) cos(r);
 
@@ -58,7 +58,7 @@ void MatT::setRotationY(const float &r) {
     update = true;
 }
 
-void MatT::setRotationZ(const float &r) {
+void MatModel::setRotationZ(const float &r) {
     float s = (float) sin(r);
     float c = (float) cos(r);
 
@@ -70,7 +70,7 @@ void MatT::setRotationZ(const float &r) {
     update = true;
 }
 
-void MatT::setTranslation(const float &x, const float &y, const float &z) {
+void MatModel::setTranslation(const float &x, const float &y, const float &z) {
     translation->setValuePosition(0, 3, x);
     translation->setValuePosition(1, 3, y);
     translation->setValuePosition(2, 3, z);
@@ -78,23 +78,23 @@ void MatT::setTranslation(const float &x, const float &y, const float &z) {
     update = true;
 }
 
-void MatT::setTranslationX(const float &x){
+void MatModel::setTranslationX(const float &x){
     translation->setValuePosition(0, 3, x);
     update = true;
 }
 
-void MatT::setTranslationY(const float &y){
+void MatModel::setTranslationY(const float &y){
     translation->setValuePosition(1, 3, y);
     update = true;
 }
 
-void MatT::setTranslationZ(const float &z){
+void MatModel::setTranslationZ(const float &z){
     translation->setValuePosition(2, 3, z);
     update = true;
 }
 
 
-void MatT::setScale(const float &s) {
+void MatModel::setScale(const float &s) {
     scale->setValuePosition(0, 0, s);
     scale->setValuePosition(1, 1, s);
     scale->setValuePosition(2, 2, s);
@@ -102,7 +102,7 @@ void MatT::setScale(const float &s) {
     update = true;
 }
 
-void MatT::setScale(const float &sx, const float &sy, const float &sz) {
+void MatModel::setScale(const float &sx, const float &sy, const float &sz) {
     scale->setValuePosition(0, 0, sx);
     scale->setValuePosition(1, 1, sy);
     scale->setValuePosition(2, 2, sz);
@@ -110,6 +110,6 @@ void MatT::setScale(const float &sx, const float &sy, const float &sz) {
     update = true;
 }
 
-void MatT::updateTransformationMatrix() {
+void MatModel::updateTransformationMatrix() {
     *transformation = ((*translation)  * (((*rotationZ) * (*rotationX)) * (*rotationY))) * (*scale);
 }

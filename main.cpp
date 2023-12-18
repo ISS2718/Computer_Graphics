@@ -10,7 +10,7 @@
 
 #include "stb_image.h"
 
-#include "MatT.h"
+#include "MatModel.h"
 #include "OBJ3D.h"
 #include "Render.h"
 #include "Shader.h"
@@ -142,7 +142,7 @@ int main(void){
     glEnable(GL_DEPTH_TEST);// ### importante para 3D
 
     float angulo = 0.0, angulo_inc = 0.0001; 
-    MatT mt_obj1, mt_obj2, mt_obj3;
+    MatModel mt_obj1, mt_obj2, mt_obj3;
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
