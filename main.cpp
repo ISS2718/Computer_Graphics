@@ -8,9 +8,15 @@
 #include <vector>
 #include <time.h>
 
+#include <glm/matrix.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
+
 #include "stb_image.h"
 
 #include "MatModel.h"
+#include "Camera.h"
 #include "OBJ3D.h"
 #include "Render.h"
 #include "Shader.h"
@@ -21,6 +27,31 @@
 
 #define WAVEFRONT_PATH "./OBJ/obj/caixa.obj"
 #define TEXTURE_PATH "./OBJ/obj/textures/caixa.jpg"
+
+bool uping = false;
+bool downing = false;
+bool righting = false;
+bool lefting = false;
+
+static void key_event(GLFWwindow* window, int key, int scancode, int action, int mods) {
+    if(key == GLFW_KEY_W) {
+        uping = true;
+    }
+
+    if(key == GLFW_KEY_S) {
+        downing = true;
+    }
+
+    if(key == GLFW_KEY_D) {
+        righting = true;
+    }
+
+    if(key == GLFW_KEY_A) {
+        lefting = true;
+    }
+}
+
+
 
 int main(void){
  
@@ -45,7 +76,7 @@ int main(void){
     // Requisitando slot para a GPU para nossos programas Vertex e Fragment Shaders
     GLuint program = glCreateProgram();
     
-    Shader s("./texture.vert", "./texture.frag");
+    Shader s("./mvp.vert", "./mvp.frag");
 
     // Carregando Vertex Shadder
     if(s.loadVertexShader() != 0) {
@@ -143,6 +174,15 @@ int main(void){
 
     float angulo = 0.0, angulo_inc = 0.0001; 
     MatModel mt_obj1, mt_obj2, mt_obj3;
+    Camera observador;
+    observador.setWindowAspect(1);
+    observador.setCameraCoordinates(0, 0, 1);
+    observador.setCameraTarget(0, 0, 0);
+    observador.setCameraViewUp(0, 1, 0);
+    observador.setFovy(M_PI/4);
+    observador.setZNear(-0.1);
+    observador.setZFar(100);
+
     while (!glfwWindowShouldClose(window))
     {
         glfwPollEvents();
@@ -159,9 +199,15 @@ int main(void){
         // mt_obj1.setRotationY(M_PI/2);
         // mt_obj1.setRotationZ(M_PI/2);
 
+        GLuint loc_mat_projection = glGetUniformLocation(program, "projection");
+        glUniformMatrix4fv(loc_mat_projection, 1, GL_FALSE, observador.getMatPerspective());
+
+        GLuint loc_mat_view = glGetUniformLocation(program, "view");
+        glUniformMatrix4fv(loc_mat_view, 1, GL_TRUE, observador.getMatView());
+
         // enviando a matriz de transformacao para a GPU
-        GLuint loc_mat_transformation = glGetUniformLocation(program, "mat_transformation");
-        glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj1.getModelMatrix());
+        GLuint loc_mat_model = glGetUniformLocation(program, "model");
+        glUniformMatrix4fv(loc_mat_model, 1, GL_TRUE, mt_obj1.getModelMatrix());
 
         // glActiveTexture(textureID);
         glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
@@ -174,8 +220,14 @@ int main(void){
         mt_obj2.setRotationY(angulo);
         // mt_obj2.setRotationZ(angulo);
 
-        loc_mat_transformation = glGetUniformLocation(program, "mat_transformation");
-        glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj2.getModelMatrix());
+        loc_mat_projection = glGetUniformLocation(program, "projection");
+        glUniformMatrix4fv(loc_mat_projection, 1, GL_FALSE, observador.getMatPerspective());
+
+        loc_mat_view = glGetUniformLocation(program, "view");
+        glUniformMatrix4fv(loc_mat_view, 1, GL_TRUE, observador.getMatView());
+
+        loc_mat_model = glGetUniformLocation(program, "model");
+        glUniformMatrix4fv(loc_mat_model, 1, GL_TRUE, mt_obj2.getModelMatrix());
 
         // glActiveTexture(textureID);
         glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
@@ -189,8 +241,14 @@ int main(void){
         // mat_transformation.setRotationY(angulo);
         mt_obj3.setRotationZ(angulo);
 
-        loc_mat_transformation = glGetUniformLocation(program, "mat_transformation");
-        glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj3.getModelMatrix());
+        loc_mat_projection = glGetUniformLocation(program, "projection");
+        glUniformMatrix4fv(loc_mat_projection, 1, GL_FALSE, observador.getMatPerspective());
+
+        loc_mat_view = glGetUniformLocation(program, "view");
+        glUniformMatrix4fv(loc_mat_view, 1, GL_TRUE, observador.getMatView());
+
+        loc_mat_model = glGetUniformLocation(program, "model");
+        glUniformMatrix4fv(loc_mat_model, 1, GL_TRUE, mt_obj3.getModelMatrix());
 
         // glActiveTexture(textureID);
         glBindTexture(GL_TEXTURE_2D, txture.getTextureID());

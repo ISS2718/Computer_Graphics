@@ -46,7 +46,7 @@ public:
     MatView(Vec3 &eye_position, Vec3 &target, Vec3 &view_up);
 
     /**
-     * Destrutor da classe MatView. Libera a memória alocada para as matrizes de transformação.
+     * Destrutor da classe MatView. Libera a memória alocada para as matrizes e vetores.
      */
     ~MatView();
 

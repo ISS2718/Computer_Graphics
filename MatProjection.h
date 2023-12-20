@@ -43,7 +43,7 @@ public:
      * @param z_near ponto no eixo Z que plano recorte perto intercepta.
      * @param z_far ponto no eixo Z que plano recorte longe intercepta.
      */
-    MatProjection(float &aspect, float &fovy, float &z_near, float &z_far);
+    MatProjection(const float &aspect, const float &fovy, const float &z_near, const float &z_far);
     
     /**
      * Destrutor da classe MatProjection. Libera a memória alocada para a matriz prespective.
@@ -58,14 +58,42 @@ public:
     GLfloat* getProjectionMatrix();
 
     /**
-     * Seta os parâmetros da perspectiva e ativa o update da matriz perspective.
+     * Define os parâmetros da perspectiva e ativa o update da matriz perspective.
      *
      * @param aspect aspecto da janela de visualização. (Largura/Altura).
      * @param fovy angulo do campo de visão em radianos.
      * @param z_near ponto no eixo Z que plano recorte perto intercepta.
      * @param z_far ponto no eixo Z que plano recorte longe intercepta.
      */
-    void setPerspectiveParameters(float &aspect, float &fovy, float &z_near, float &z_far);
+    void setPerspectiveParameters(const float &aspect, const float &fovy, const float &z_near, const float &z_far);
+
+    /**
+     * Define o aspecto da janela de visualização. (Largura/Altura).
+     *
+     * @param aspect aspecto da janela de visualização. (Largura/Altura).
+     */
+    void setAspect(const float &aspect);
+
+    /**
+     * Define o angulo do campo de visão em radianos.
+     *
+     * @param fovy angulo do campo de visão em radianos.
+     */
+    void setFovy(const float &fovy);
+
+    /**
+     * Define o ponto no eixo Z que plano recorte perto intercepta.
+     *
+     * @param z_near ponto no eixo Z que plano recorte perto intercepta.
+     */
+    void setZNear(const float &z_near);
+
+    /**
+     * Define o ponto no eixo Z que plano recorte longe intercepta.
+     *
+     * @param z_far ponto no eixo Z que plano recorte longe intercepta.
+     */
+    void setZFar(const float &z_far);
 };
 
 #endif

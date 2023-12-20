@@ -5,7 +5,7 @@ MatProjection::MatProjection() {
     update = false;
 }
 
-MatProjection::MatProjection(float &aspect, float &fovy, float &z_near, float &z_far) : MatProjection() {
+MatProjection::MatProjection(const float &aspect, const float &fovy, const float &z_near, const float &z_far) : MatProjection() {
     setPerspectiveParameters(aspect, fovy, z_near, z_far);
 }
 
@@ -21,7 +21,7 @@ GLfloat* MatProjection::getProjectionMatrix() {
     return (GLfloat*) perspective->getMatrix();
 }
 
-void MatProjection::setPerspectiveParameters(float &aspect, float &fovy, float &z_near, float &z_far) {
+void MatProjection::setPerspectiveParameters(const float &aspect, const float &fovy, const float &z_near, const float &z_far) {
     this->aspect = aspect;
     this->fovy = fovy;
     this->z_near = z_near;
@@ -30,6 +30,29 @@ void MatProjection::setPerspectiveParameters(float &aspect, float &fovy, float &
     update = true;
 }
 
+void MatProjection::setAspect(const float &aspect){
+    this->aspect = aspect;
+    
+    update = true;
+}
+
+void MatProjection::setFovy(const float &fovy){
+    this->fovy = fovy;
+    
+    update = true;
+}
+
+void MatProjection::setZNear(const float &z_near){
+    this->z_near = z_near;
+    
+    update = true;
+}
+
+void MatProjection::setZFar(const float &z_far){
+    this->z_far = z_far;
+    
+    update = true;
+}
 
 void MatProjection::updatePerspectiveMatrix() {
     float tan_half_fovy = tan(fovy/2);
