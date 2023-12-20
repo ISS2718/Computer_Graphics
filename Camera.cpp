@@ -1,130 +1,150 @@
-#include "Camera.h"
+#include "camera.h"
 
-Camera::Camera() {
-    perspective = new MatProjection();
-    view = new MatView();
-    camera_coordinates = new Vec3(0);
-    camera_target = new Vec3(0);
-    camera_view_up = new Vec3(0);
-
-    update_view = false;
+//Construtor da camera
+camera::camera(GLuint program, glm::vec3 pos, glm::vec3 front, glm::vec3 up, float fov, float aspect_ratio, float near, float far, bool freeCamera = true){
+    this->program = program;
+    this->pos = pos;
+    this->front = front;
+    this->up = up;
+    this->fov = fov;
+    this->aspect_ratio = aspect_ratio;
+    this->near = near;
+    this->far = far;
+    this->freeCamera = freeCamera;
+    this->speed = 3.5f;
+    this->sensibility = 2.5f;
 }
 
-Camera::~Camera() {
-    delete perspective;
-    delete view;
-    delete camera_coordinates;
-    delete camera_target;
-    delete camera_view_up;
-}
-
-GLfloat* Camera::getMatPerspective() {
-    return perspective->getProjectionMatrix();
-}
-
-GLfloat* Camera::getMatView(){
-    if(update_view) {
-        view->setViewCoordinates(*camera_coordinates, *camera_target, *camera_view_up);
+//Movimentacao da camera para frente
+void camera::moveFront(float deltaTime){
+    if(this->freeCamera){
+        this->pos += this->speed * this->front * deltaTime;
     }
-    return view->getViewMatrix();
+    else{ //Nao eh uma free camera, logo y constante
+        this->pos.x += this->speed * this->front.x * deltaTime;
+        this->pos.z += this->speed * this->front.z * deltaTime;
+    }
 }
 
-Vec3 Camera::getCameraCoordinates(){
-    return *camera_coordinates;
+//Movimentacao da camera para tras
+void camera::moveBack(float deltaTime){
+    if(this->freeCamera){
+        this->pos -= this->speed * this->front * deltaTime;
+    }
+    else{ //Nao eh uma free camera, logo y constante
+        this->pos.x -= this->speed * this->front.x * deltaTime;
+        this->pos.z -= this->speed * this->front.z * deltaTime;
+    }
 }
 
-float Camera::getCameraCoordinateX(){
-    return camera_coordinates->getX();
+//Movimentacao da camera para esquerda
+void camera::moveLeft(float deltaTime){
+    if(this->freeCamera){
+        this->pos -= glm::normalize(glm::cross(this->front, this->up)) * this->speed * deltaTime; 
+    }
+    else{
+        glm::vec3 cross = glm::cross(this->front, this->up);
+        cross = glm::normalize(cross);
+        this->pos.x -= cross.x * this->speed * deltaTime;
+        this->pos.z -= cross.z * this->speed * deltaTime;
+    }
 }
 
-float Camera::getCameraCoordinateY(){
-    return camera_coordinates->getY();
+//Movimentacao da camera para direita
+void camera::moveRight(float deltaTime){
+    if(this->freeCamera){
+        this->pos += glm::normalize(glm::cross(this->front, this->up)) * this->speed * deltaTime; 
+    }
+    else{
+        glm::vec3 cross = glm::cross(this->front, this->up);
+        cross = glm::normalize(cross);
+        this->pos.x += cross.x * this->speed * deltaTime;
+        this->pos.z += cross.z * this->speed * deltaTime;
+    }
 }
 
-float Camera::getCameraCoordinateZ(){
-    return camera_coordinates->getZ();
-}
+//Calcula os valores das matrizes de view e projection e manda para a gpu
+void camera::update(){
+    if(this->pos.x > 14.0f){ //Limites em x da camera no cenario
+        this->pos.x = 14.0f;
+    }
+    else if(this->pos.x < -14.0f){
+        this->pos.x = -14.0f;
+    }
 
-Vec3 Camera::getCameraTarget(){
-    return *camera_target;
-}
+    if(this->pos.y > 14.0f){ //Limites em y da camera no cenario
+        this->pos.y = 14.0f;
+    }
+    else if(this->pos.y < 0.1f){
+        this->pos.y = 0.1f;
+    }
 
-float Camera::getCameraTargetX(){
-    return camera_target->getX();
-}
 
-float Camera::getCameraTargetY(){
-    return camera_target->getY();
-}
-
-float Camera::getCameraTargetZ(){
-    return camera_target->getZ();
-}
-
-void Camera::setCameraCoordinates(const float &x,const float &y, const float &z){
-    camera_coordinates->set(x, y, z);
+    if(this->pos.z > 14.0f){  //Limites em z da camera no cenario
+        this->pos.z = 14.0f;
+    }
+    else if(this->pos.z < -14.0f){
+        this->pos.z = -14.0f;
+    }
     
-    update_view = true;
-}
-
-void Camera::setCameraCoordinateX(const float &x){
-    camera_coordinates->setX(x);
     
-    update_view = true;
+    //Calculo das matrizes de view e projection
+    glm::mat4 m_view = glm::lookAt(this->pos, this->pos + this->front, this->up);
+    glm::mat4 m_projection = glm::perspective(glm::radians(this->fov), this->aspect_ratio, this->near, this->far);
+
+    //Manda para a gpu a matriz de view
+    int loc_view = glGetUniformLocation(program, "view");
+    glUniformMatrix4fv(loc_view, 1, GL_FALSE, glm::value_ptr(m_view));
+
+    //Manda para a gpu a matriz de projection
+    int loc_projection = glGetUniformLocation(program, "projection");
+    glUniformMatrix4fv(loc_projection, 1, GL_FALSE,glm::value_ptr(m_projection));    
 }
 
-void Camera::setCameraCoordinateY(const float &y){
-    camera_coordinates->setY(y);
 
-    update_view = true;
+//Sets methods
+void camera::setPos(glm::vec3 pos){
+    this->pos = pos;
 }
 
-void Camera::setCameraCoordinateZ(const float &z){
-    camera_coordinates->setZ(z);
-
-    update_view = true;
+void camera::setFront(glm::vec3 front){
+    this->front = front;
 }
 
-void Camera::setCameraTarget(const float &x,const float &y, const float &z){
-    camera_target->set(x, y, z);
-
-    update_view = true;
+void camera::setUp(glm::vec3 up){
+    this->up = up;
 }
 
-void Camera::setCameraTargetX(const float &x){
-    camera_target->setX(x);
-
-    update_view = true;
-}
-void Camera::setCameraTargetY(const float &y){
-    camera_target->setY(y);
-
-    update_view = true;
+void camera::setFov(float fov){
+    this->fov = fov;
 }
 
-void Camera::setCameraTargetZ(const float &z){
-    camera_target->setZ(z);
-
-    update_view = true;
+void camera::setAspectRatio(float aspect_ratio){
+    this->aspect_ratio = aspect_ratio;
 }
 
-void Camera::setCameraViewUp(const float &x,const float &y, const float &z) {
-    camera_view_up->set(x, y, z);
-
-    update_view = true;
+void camera::setNear(float near){
+    this->near = near;
 }
 
-void Camera::setZNear(const float &z_near){
-    perspective->setZNear(z_near);
-}
-void Camera::setZFar(const float &z_far){
-    perspective->setZFar(z_far);
+void camera::setFar(float far){
+    this->far = far;
 }
 
-void Camera::setFovy(const float &fovy){
-    perspective->setFovy(fovy);
+void camera::setCameraMode(bool freeCamera){
+    this->freeCamera = freeCamera;
 }
 
-void Camera::setWindowAspect(const float &window_aspect){
-    perspective->setAspect(window_aspect);
+void camera::setSpeed(float speed){
+    this->speed = speed;
 }
+
+void camera::setSensibility(float sensibility){
+    this->sensibility = sensibility;
+}
+
+glm::vec3 camera::getPos(){
+    return this->pos;
+}
+
+camera::~camera(){}

@@ -8,6 +8,11 @@
 #include <vector>
 #include <time.h>
 
+#include <glm/matrix.hpp>
+#include <glm/gtx/transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
+
 #include "stb_image.h"
 
 #include "MatModel.h"
@@ -24,43 +29,64 @@
 #define TEXTURE_PATH "./OBJ/obj/textures/caixa.jpg"
 
 
-Vec3 coordinates(0, 0, 1), target(0.1, 0.1, 0.1), view_up(0, 1, 0), speed(3.5);
+int altura = 1000;
+int largura = 1000;
 
-static void key_event(GLFWwindow* window, int key, int scancode, int action, int mods) {
-    if(key == GLFW_KEY_W) {
-        coordinates += speed * target;
+float deltaTime = 0.0f;	//Tempo entre o ultimo frame e o atual. Usado para obter uma movimentacao mais "suave" da camera pelo cenario
+float lastFrame = 0.0f; //Tempo do ultimo frame 
+
+glm::vec3 cameraFront(0.1,  0.1, 0.1); //Variavel global para matriz View
+
+
+//Variaveis globais de controle de tecla
+bool stop = false;          //Caso a tecla para fechar o programa seja apertada
+bool polygonMode = false;   //Caso a tecla para modo poligono seja apertada
+bool W = false;             //Caso a tecla W seja apertada
+bool A = false;             //Caso a tecla A seja apertada
+bool S = false;             //Caso a tecla S seja apertada
+bool D = false;             //Caso a tecla D seja apertada
+
+
+//Funcao de callback para eventos de teclado
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
+    float cameraSpeed = 0.1;
+    if(key == 87 && (action==1 || action==2)){ //Se tecla W apertada
+        W = true;
     }
-
-    if(key == GLFW_KEY_S) {
-        coordinates -= speed * target;
+    if(key == 83 && (action==1 || action==2)){ //Se tecla S apertada
+        S = true;
     }
-
-    if(key == GLFW_KEY_D) {
-        Vec3 r = target.cross(view_up);
-        r.normalized();
-        coordinates -= speed * r;
+    if(key == 65 && (action==1 || action==2)){ //Se tecla A apertada
+        A = true;    
     }
-
-    if(key == GLFW_KEY_A) {
-        Vec3 r = target.cross(view_up);
-        r.normalized();
-        coordinates -= speed * r;
+    if(key == 68 && (action==1 || action==2)){ //Se tecla D apertada
+        D = true;
+    }
+    if(key == GLFW_KEY_Q && (action==1 || action==2)) //Se tecla Q apertada, entao diz que o programa deve ser fechado
+        stop = true;
+    if(key == GLFW_KEY_P && (action==1 || action==2)){ //Se tecla P apertada, entao ativara/desativara o modo poligono
+        polygonMode = !polygonMode;
     }
 }
 
 //Variaveis globais para controle do uso do mouse
 float yaw =  -90.0;         
 float pitch = 0.0;
-float lastX = 800/2;
-float lastY = 800/2;
+float lastX = largura/2;
+float lastY = altura/2;
 
-static void mouse_event(GLFWwindow* window, double xpos, double ypos) {
-    float xoffset = xpos - 400;     //Calcula quanto o mouse foi mexido em X desde a ultima chamada da funcao
-    float yoffset = 400 - ypos;     //Calcula quanto o mouse foi mexido em Y desde a ultima chamada da funcao, invertido
+//Funcao que realiza a leitura dos valores do mouse e obtem para onde a camera deve ser apontada
+void cursor_position_update(GLFWwindow* window){
+    double xpos, ypos;
+    glfwGetCursorPos(window,&xpos,&ypos);       //Pega a posicao atual do cursor na tela
+    glfwSetCursorPos(window, 500.0, 500.0);     //Muda a posicao do cursor para o centro da tela para a proxima chamada da funcao
+    
+    float xoffset = xpos - 500;     //Calcula quanto o mouse foi mexido em X desde a ultima chamada da funcao
+    float yoffset = 500 - ypos;     //Calcula quanto o mouse foi mexido em Y desde a ultima chamada da funcao, invertido
 
     float sensitivity = 2.5f;              //Sensibilidade da camera
-    xoffset *= sensitivity;    //Calcula o quanto o angulo da camera em X foi alterado 
-    yoffset *= sensitivity;   //Calcula o quanto o angulo da camera em Y foi alterado
+    xoffset *= sensitivity * deltaTime;    //Calcula o quanto o angulo da camera em X foi alterado 
+    yoffset *= sensitivity * deltaTime;    //Calcula o quanto o angulo da camera em Y foi alterado
 
     yaw += xoffset;     //Calcula o angulo atual da camera em X
     pitch += yoffset;   //Calcula o angulo atual da camera em Y
@@ -69,14 +95,13 @@ static void mouse_event(GLFWwindow* window, double xpos, double ypos) {
     if (pitch >= 89.9) pitch = 89.9;    //Define limites para o angulo da camera em Y
     if (pitch <= -89.9) pitch = -89.9;
 
-    double yaw_rad = (M_PI/180) * yaw;
-    double pitch_rad = (M_PI/180) * pitch;
     //Com base nos angulos da camera em X e Y calcula o ponto para o qual a camera esta olhando
-    target.setX(cos(yaw_rad) * cos(pitch_rad));
-    target.setY(sin(pitch_rad));
-    target.setZ(sin(yaw_rad) * cos(pitch_rad));
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(front);
 }
-
 int main(void){
  
     // inicicializando o sistema de\ janelas
@@ -87,7 +112,7 @@ int main(void){
 
  
     // criando uma janela
-    GLFWwindow* window = glfwCreateWindow(800, 800, "Wavefront", NULL, NULL);
+    GLFWwindow* window = glfwCreateWindow(largura, altura, "Wavefront", NULL, NULL);
 
     
     // tornando a janela como principal 
@@ -96,6 +121,9 @@ int main(void){
     // inicializando Glew (para lidar com funcoes OpenGL)
     GLint GlewInitResult = glewInit();
     printf("GlewStatus: %s\n", glewGetErrorString(GlewInitResult));
+
+    glfwSetKeyCallback(window, key_callback);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);    //Ativa o modo sem cursor do mouse
 
     // Requisitando slot para a GPU para nossos programas Vertex e Fragment Shaders
     GLuint program = glCreateProgram();
@@ -189,37 +217,53 @@ int main(void){
     glEnableVertexAttribArray(loc_texture_coord);
     glVertexAttribPointer(loc_texture_coord, 2, GL_FLOAT, GL_FALSE, sizeof(uvs[0]), (void*) 0); // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glVertexAttribPointer.xhtml
 
-    // Associando nossa janela com eventos de teclado
-    glfwSetKeyCallback(window, key_event); // teclado
-
-    // Associando nossa janela com eventos de mouse
-    glfwSetCursorPosCallback(window, mouse_event); // mouse
-
     // Exibindo nossa janela
     glfwShowWindow(window);
-
 
     glEnable(GL_DEPTH_TEST);// ### importante para 3D
 
     float angulo = 0.0, angulo_inc = 0.0001; 
     MatModel mt_obj1, mt_obj2, mt_obj3;
-    Camera observador;
-    observador.setWindowAspect(1);
-    observador.setCameraCoordinates(0, 0, 1);
-    observador.setCameraTarget(0.1, 0.1, 0.1);
-    observador.setCameraViewUp(0, 1, 0);
-    observador.setFovy(M_PI/2);
-    observador.setZNear(-1);
-    observador.setZFar(1);
 
-    while (!glfwWindowShouldClose(window))
-    {
+    //Inicializa o objeto de camera responsavel por criar as matrizes VIEW e PROJECTION do pipeline MVP
+    camera Cam(program, glm::vec3(0.1, 0.1, 1), cameraFront, glm::vec3(0.0,1.0,0.0), 60, 1.0f, 0.1f, 100.0f, true);
+
+    while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glClearColor(1.0, 1.0, 1.0, 1.0);
 
-        angulo += angulo_inc;
+        //Calcula quanto tempo se passou entre o ultimo frame e o atual
+        float currentFrame = glfwGetTime();
+        deltaTime = currentFrame - lastFrame;
+        lastFrame = currentFrame;  
+
+        cursor_position_update(window); //Chama a funcao que le as coordenadas do mouse e obtem para onde a camera deve olhar 
+
+        //Movimenta a camera pelo cenario
+        if(W){  //Para frente
+            Cam.moveFront(deltaTime);
+            W = false;
+        }
+        if(S){  //Para tras
+            Cam.moveBack(deltaTime);
+            S = false;
+        }
+        if(A){  //Para a esquerda
+            Cam.moveLeft(deltaTime);
+            A = false;
+        }
+        if(D){  //Para a direita
+            Cam.moveRight(deltaTime);
+            D = false;
+        }
+
+
+        Cam.setFront(cameraFront);  //set para onde a camera deve olhar, calculado pela funcao de leitura do mouse
+        Cam.update();               //atualiza e manda os valores das matrizes calculadas pelo objeto de camera para a GPU (VIEW e PROJECTION)
+
+                angulo += angulo_inc;
 
         mt_obj1.setScale(0.05);
         mt_obj1.setTranslation(0.5, 0, 0);
@@ -232,19 +276,13 @@ int main(void){
         // observador.setCameraTarget(target.getX(), target.getY(), target.getZ());
         // observador.setCameraViewUp(view_up.getX(), view_up.getY(), view_up.getZ());
 
-        GLuint loc_mat_projection = glGetUniformLocation(program, "projection");
-        glUniformMatrix4fv(loc_mat_projection, 1, GL_FALSE, observador.getMatPerspective());
-
-        GLuint loc_mat_view = glGetUniformLocation(program, "view");
-        glUniformMatrix4fv(loc_mat_view, 1, GL_TRUE, observador.getMatView());
-
         // enviando a matriz de transformacao para a GPU
         GLuint loc_mat_model = glGetUniformLocation(program, "model");
         glUniformMatrix4fv(loc_mat_model, 1, GL_TRUE, mt_obj1.getModelMatrix());
 
         // glActiveTexture(textureID);
         glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
-        glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getNormalsEnd());
+        glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getVertexEnd());
 
         mt_obj2.setScale(0.1);
         mt_obj2.setTranslation(-0.5, 0, 0);
@@ -253,18 +291,12 @@ int main(void){
         mt_obj2.setRotationY(angulo);
         // mt_obj2.setRotationZ(angulo);
 
-        loc_mat_projection = glGetUniformLocation(program, "projection");
-        glUniformMatrix4fv(loc_mat_projection, 1, GL_FALSE, observador.getMatPerspective());
-
-        loc_mat_view = glGetUniformLocation(program, "view");
-        glUniformMatrix4fv(loc_mat_view, 1, GL_TRUE, observador.getMatView());
-
         loc_mat_model = glGetUniformLocation(program, "model");
         glUniformMatrix4fv(loc_mat_model, 1, GL_TRUE, mt_obj2.getModelMatrix());
 
         // glActiveTexture(textureID);
         glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
-        glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getNormalsEnd());
+        glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getVertexEnd());
 
 
         mt_obj3.setScale(0.3);
@@ -274,18 +306,12 @@ int main(void){
         // mat_transformation.setRotationY(angulo);
         mt_obj3.setRotationZ(angulo);
 
-        loc_mat_projection = glGetUniformLocation(program, "projection");
-        glUniformMatrix4fv(loc_mat_projection, 1, GL_FALSE, observador.getMatPerspective());
-
-        loc_mat_view = glGetUniformLocation(program, "view");
-        glUniformMatrix4fv(loc_mat_view, 1, GL_TRUE, observador.getMatView());
-
         loc_mat_model = glGetUniformLocation(program, "model");
         glUniformMatrix4fv(loc_mat_model, 1, GL_TRUE, mt_obj3.getModelMatrix());
 
         // glActiveTexture(textureID);
         glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
-        glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getNormalsEnd());
+        glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getVertexEnd());
 
 
         glfwSwapBuffers(window);   
