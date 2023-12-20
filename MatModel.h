@@ -3,29 +3,29 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <math.h>
+#include <cmath>
 
 #include "Mat4.h"
 
 /**
  * @class MatModel
- * @brief Representa uma classe de matrizes de transformações para objetos 2D/3D.
+ * @brief Representa uma classe da matriz Model.
  */
 class MatModel {
 private:
-    Mat4* transformation; /**< Matriz de transformação final (multiplicação de todas). */
+    Mat4* model; /**< Matriz model final (multiplicação de todas). */
     Mat4* translation; /**< Matriz de translação. */
     Mat4* rotationX; /**< Matriz de rotação no eixo X. */
     Mat4* rotationY; /**< Matriz de rotação no eixo Y. */
     Mat4* rotationZ; /**< Matriz de rotação no eixo Z. */
     Mat4* scale; /**< Matriz de escala. */
 
-    bool update; /**< Flag de update nas matrizes para recalcular a matriz "transformation". */
+    bool update; /**< Flag de update nas matrizes para recalcular a matriz model. */
 
     /**
-     * Atualiza a matriz de transformação combinando todas as transformações individuais.
+     * Atualiza a matriz model combinando todas as transformações individuais.
      */
-    void updateTransformationMatrix();
+    void updateModelMatrix();
 
 public:
     /**
@@ -39,11 +39,11 @@ public:
     ~MatModel();
 
     /**
-     * Obtém a matriz de transformação resultante.
+     * Obtém a matriz Model resultante.
      *
-     * @return Um ponteiro para a matriz de transformação.
+     * @return Um ponteiro para a matriz Model.
      */
-    GLfloat* getTransformationMatrix();
+    GLfloat* getModelMatrix();
 
     /**
      * Define uma rotação nos eixos x, y e z, aplicando as rotações em sequência.

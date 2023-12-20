@@ -109,7 +109,7 @@ static void key_event(GLFWwindow* window, int key, int scancode, int action, int
     }
 }
 
-void verifyAndMakeMov(OBJ3D &obj, MatT *mt_obj, Vec3 *actual_coordiante) {
+void verifyAndMakeMov(OBJ3D &obj, MatModel *mt_obj, Vec3 *actual_coordiante) {
     if(uping) {
         if(actual_coordiante->getY() < 1) {
             actual_coordiante->setY(actual_coordiante->getY() + COORD_INC);
@@ -151,7 +151,7 @@ void verifyAndMakeMov(OBJ3D &obj, MatT *mt_obj, Vec3 *actual_coordiante) {
     }
 }
 
-void verifyAndMakeScale(OBJ3D &obj, MatT *mt_obj, float *actual_scale) {
+void verifyAndMakeScale(OBJ3D &obj, MatModel *mt_obj, float *actual_scale) {
     Vec3 max = obj.getMaxVertexCoordinates();
     Vec3 min = obj.getMinVertexCoordinates();
     if(scale_up) {
@@ -185,7 +185,7 @@ void verifyAndMakeScale(OBJ3D &obj, MatT *mt_obj, float *actual_scale) {
     }
 }
 
-void verifyAndMakeRotate(OBJ3D &obj, MatT *mt_obj, Vec3 *actual_angle) {
+void verifyAndMakeRotate(OBJ3D &obj, MatModel *mt_obj, Vec3 *actual_angle) {
     if(rotate_x_up) {
         actual_angle->setX(actual_angle->getX() + ANGLE_INC);
         mt_obj->setRotationX(actual_angle->getX());
@@ -364,7 +364,7 @@ int loadObjectAndTexture(OBJ3D *objetos, Texture *texturas, std::vector<Vec3> *v
     return 0;
 }
 
-void renderLoop(GLFWwindow *window, GLint *program, OBJ3D *objetos, Texture *texturas, MatT *mt_obj, float *scale_obj, Vec3 *coord_obj, Vec3 *angle_obj) {
+void renderLoop(GLFWwindow *window, GLint *program, OBJ3D *objetos, Texture *texturas, MatModel *mt_obj, float *scale_obj, Vec3 *coord_obj, Vec3 *angle_obj) {
     while (!glfwWindowShouldClose(window)) {
         // Verifique o tempo no início do quadro
         double frameStart = glfwGetTime();
@@ -382,7 +382,7 @@ void renderLoop(GLFWwindow *window, GLint *program, OBJ3D *objetos, Texture *tex
 
         // enviando a matriz de transformacao para a GPU
         GLuint loc_mat_transformation = glGetUniformLocation(*program, "mat_transformation");
-        glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj[select_obj].getTransformationMatrix());
+        glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj[select_obj].getModelMatrix());
         
         verifyAndModifyTexture(&(texturas[select_obj]));
             

@@ -161,7 +161,7 @@ int main(void){
 
         // enviando a matriz de transformacao para a GPU
         GLuint loc_mat_transformation = glGetUniformLocation(program, "mat_transformation");
-        glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj1.getTransformationMatrix());
+        glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj1.getModelMatrix());
 
         // glActiveTexture(textureID);
         glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
@@ -175,7 +175,7 @@ int main(void){
         // mt_obj2.setRotationZ(angulo);
 
         loc_mat_transformation = glGetUniformLocation(program, "mat_transformation");
-        glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj2.getTransformationMatrix());
+        glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj2.getModelMatrix());
 
         // glActiveTexture(textureID);
         glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
@@ -190,7 +190,7 @@ int main(void){
         mt_obj3.setRotationZ(angulo);
 
         loc_mat_transformation = glGetUniformLocation(program, "mat_transformation");
-        glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj3.getTransformationMatrix());
+        glUniformMatrix4fv(loc_mat_transformation, 1, GL_TRUE, mt_obj3.getModelMatrix());
 
         // glActiveTexture(textureID);
         glBindTexture(GL_TEXTURE_2D, txture.getTextureID());

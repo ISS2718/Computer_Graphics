@@ -1,7 +1,7 @@
 #include "MatModel.h"
 
 MatModel::MatModel() {
-    transformation = new Mat4(true);
+    model = new Mat4(true);
     translation =  new Mat4(true);
     rotationX =  new Mat4(true);
     rotationY =  new Mat4(true);
@@ -12,7 +12,7 @@ MatModel::MatModel() {
 }
 
 MatModel::~MatModel() {
-    delete transformation;
+    delete model;
     delete translation;
     delete rotationX;
     delete rotationY;
@@ -20,12 +20,12 @@ MatModel::~MatModel() {
     delete scale;
 }
 
-GLfloat* MatModel::getTransformationMatrix() {
+GLfloat* MatModel::getModelMatrix() {
     if(update) {
-        updateTransformationMatrix();
+        updateModelMatrix();
     }
 
-    return (GLfloat*) transformation->getMatrix();
+    return (GLfloat*) model->getMatrix();
 }
 
 void MatModel::setRotation(const float &rx, const float &ry, const float &rz) {
@@ -110,6 +110,8 @@ void MatModel::setScale(const float &sx, const float &sy, const float &sz) {
     update = true;
 }
 
-void MatModel::updateTransformationMatrix() {
-    *transformation = ((*translation)  * (((*rotationZ) * (*rotationX)) * (*rotationY))) * (*scale);
+void MatModel::updateModelMatrix() {
+    *model = ((*translation)  * (((*rotationZ) * (*rotationX)) * (*rotationY))) * (*scale);
+    
+    update = false;
 }
