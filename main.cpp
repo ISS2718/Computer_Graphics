@@ -8,11 +8,6 @@
 #include <vector>
 #include <time.h>
 
-#include <glm/matrix.hpp>
-#include <glm/gtx/transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <glm/gtx/string_cast.hpp>
-
 #include "stb_image.h"
 
 #include "MatModel.h"
@@ -28,30 +23,59 @@
 #define WAVEFRONT_PATH "./OBJ/obj/caixa.obj"
 #define TEXTURE_PATH "./OBJ/obj/textures/caixa.jpg"
 
-bool uping = false;
-bool downing = false;
-bool righting = false;
-bool lefting = false;
+
+Vec3 coordinates(0, 0, 1), target(0.1, 0.1, 0.1), view_up(0, 1, 0), speed(3.5);
 
 static void key_event(GLFWwindow* window, int key, int scancode, int action, int mods) {
     if(key == GLFW_KEY_W) {
-        uping = true;
+        coordinates += speed * target;
     }
 
     if(key == GLFW_KEY_S) {
-        downing = true;
+        coordinates -= speed * target;
     }
 
     if(key == GLFW_KEY_D) {
-        righting = true;
+        Vec3 r = target.cross(view_up);
+        r.normalized();
+        coordinates -= speed * r;
     }
 
     if(key == GLFW_KEY_A) {
-        lefting = true;
+        Vec3 r = target.cross(view_up);
+        r.normalized();
+        coordinates -= speed * r;
     }
 }
 
+//Variaveis globais para controle do uso do mouse
+float yaw =  -90.0;         
+float pitch = 0.0;
+float lastX = 800/2;
+float lastY = 800/2;
 
+static void mouse_event(GLFWwindow* window, double xpos, double ypos) {
+    float xoffset = xpos - 400;     //Calcula quanto o mouse foi mexido em X desde a ultima chamada da funcao
+    float yoffset = 400 - ypos;     //Calcula quanto o mouse foi mexido em Y desde a ultima chamada da funcao, invertido
+
+    float sensitivity = 2.5f;              //Sensibilidade da camera
+    xoffset *= sensitivity;    //Calcula o quanto o angulo da camera em X foi alterado 
+    yoffset *= sensitivity;   //Calcula o quanto o angulo da camera em Y foi alterado
+
+    yaw += xoffset;     //Calcula o angulo atual da camera em X
+    pitch += yoffset;   //Calcula o angulo atual da camera em Y
+
+    
+    if (pitch >= 89.9) pitch = 89.9;    //Define limites para o angulo da camera em Y
+    if (pitch <= -89.9) pitch = -89.9;
+
+    double yaw_rad = (M_PI/180) * yaw;
+    double pitch_rad = (M_PI/180) * pitch;
+    //Com base nos angulos da camera em X e Y calcula o ponto para o qual a camera esta olhando
+    target.setX(cos(yaw_rad) * cos(pitch_rad));
+    target.setY(sin(pitch_rad));
+    target.setZ(sin(yaw_rad) * cos(pitch_rad));
+}
 
 int main(void){
  
@@ -165,6 +189,11 @@ int main(void){
     glEnableVertexAttribArray(loc_texture_coord);
     glVertexAttribPointer(loc_texture_coord, 2, GL_FLOAT, GL_FALSE, sizeof(uvs[0]), (void*) 0); // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glVertexAttribPointer.xhtml
 
+    // Associando nossa janela com eventos de teclado
+    glfwSetKeyCallback(window, key_event); // teclado
+
+    // Associando nossa janela com eventos de mouse
+    glfwSetCursorPosCallback(window, mouse_event); // mouse
 
     // Exibindo nossa janela
     glfwShowWindow(window);
@@ -177,11 +206,11 @@ int main(void){
     Camera observador;
     observador.setWindowAspect(1);
     observador.setCameraCoordinates(0, 0, 1);
-    observador.setCameraTarget(0, 0, 0);
+    observador.setCameraTarget(0.1, 0.1, 0.1);
     observador.setCameraViewUp(0, 1, 0);
-    observador.setFovy(M_PI/4);
-    observador.setZNear(-0.1);
-    observador.setZFar(100);
+    observador.setFovy(M_PI/2);
+    observador.setZNear(-1);
+    observador.setZFar(1);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -198,6 +227,10 @@ int main(void){
         mt_obj1.setRotationX(angulo);
         // mt_obj1.setRotationY(M_PI/2);
         // mt_obj1.setRotationZ(M_PI/2);
+
+        // observador.setCameraCoordinates(coordinates.getX(), coordinates.getY(), coordinates.getZ());
+        // observador.setCameraTarget(target.getX(), target.getY(), target.getZ());
+        // observador.setCameraViewUp(view_up.getX(), view_up.getY(), view_up.getZ());
 
         GLuint loc_mat_projection = glGetUniformLocation(program, "projection");
         glUniformMatrix4fv(loc_mat_projection, 1, GL_FALSE, observador.getMatPerspective());

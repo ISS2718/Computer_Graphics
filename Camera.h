@@ -17,6 +17,8 @@ private:
     Vec3* camera_coordinates;
     Vec3* camera_target;
     Vec3* camera_view_up;
+
+    bool update_view;
 public:
     /**
      * Construtor da classe Camera. 
