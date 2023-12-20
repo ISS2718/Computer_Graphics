@@ -86,10 +86,9 @@ void camera::update(){
     else if(this->pos.z < -14.0f){
         this->pos.z = -14.0f;
     }
-    
-    
+
     //Calculo das matrizes de view e projection
-    glm::mat4 m_view = glm::lookAt(this->pos, this->pos + this->front, this->up);
+    glm::mat4 m_view = glm::lookAt(this->pos, /*this->pos + */this->front, this->up);
     glm::mat4 m_projection = glm::perspective(glm::radians(this->fov), this->aspect_ratio, this->near, this->far);
 
     //Manda para a gpu a matriz de view

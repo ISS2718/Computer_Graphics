@@ -43,6 +43,11 @@ private:
     
     Vec3 min_vertex_coordinates; /**< Coordenadas mínimas dos vértices. */
 
+    float ka; /**< coeficiente de reflexao ambiente do modelo. */
+    float kd; /**< coeficiente de reflexao difusa do modelo. */
+    float ks; /**< coeficiente de reflexao especular do modelo. */
+    float ns; /**< expoente de reflexao especular. */
+
     /**
      * Lê as faces compostas por triângulos de uma linha no formato .obj e extrai os índices dos vértices, coordenadas de textura e normais, se disponíveis.
      * @param line A linha contendo informações sobre as faces.
@@ -169,6 +174,59 @@ public:
      * @return As coordenadas mínimas dos vértices.
      */
     Vec3 getMinVertexCoordinates();
+
+    /**
+     * Obtém o coeficiente de reflexao ambiente do modelo.
+     * @return coeficiente de reflexao ambiente do modelo.
+     */
+    float getKa();
+
+    /**
+     * Obtém o coeficiente de reflexao difusa do modelo.
+     * @return coeficiente de reflexao difusa do modelo.
+     */
+    float getKd();
+
+    /**
+     * Obtém o coeficiente de reflexao especular do modelo.
+     * @return coeficiente de reflexao especular do modelo.
+     */
+    float getKs();
+
+    /**
+     * Obtém o expoente de reflexao especular.
+     * @return expoente de reflexao especular.
+     */
+    float getNs();
+
+    /**
+     * Define o coeficiente de reflexao ambiente do modelo.
+     * @param ka coeficiente de reflexao ambiente do modelo.
+     * @return Referência para a instância de OBJ3D atualizada.
+     */
+    OBJ3D& setKa(float ka);
+
+    /**
+     * Define o coeficiente de reflexao difusa do modelo.
+     * @param kd coeficiente de reflexao difusa do modelo.
+     * @return Referência para a instância de OBJ3D atualizada.
+     */
+    OBJ3D& setKd(float kd);
+
+    /**
+     * Define o coeficiente de reflexao especular do modelo.
+     * @param kd coeficiente de reflexao especular do modelo.
+     * @return Referência para a instância de OBJ3D atualizada.
+     */
+    OBJ3D& setKs(float ks);
+
+    /**
+     * Define o expoente de reflexao especular.
+     * @param ns expoente de reflexao especular.
+     * @return Referência para a instância de OBJ3D atualizada.
+     */
+    OBJ3D& setNs(float ns);
+
 
     /**
      * Define o tipo de renderização.

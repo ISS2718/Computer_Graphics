@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <fstream>
+#include <cstring>
 #include <string>
 
 #define INFO_LENGTH 512 /**< Tamanho máximo esperado para informações e mensagens de erro. */

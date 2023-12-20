@@ -110,6 +110,7 @@ int Shader::loadShader(const std::string &path,  std::string *shader) {
     char line[512];
     while(!file.eof()) {
         file.getline(line, 512);
+        strcat(line, "\n");
         shader->append(line);
     }
     shader->push_back('\0');

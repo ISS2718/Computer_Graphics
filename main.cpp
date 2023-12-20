@@ -35,7 +35,7 @@ int largura = 1000;
 float deltaTime = 0.0f;	//Tempo entre o ultimo frame e o atual. Usado para obter uma movimentacao mais "suave" da camera pelo cenario
 float lastFrame = 0.0f; //Tempo do ultimo frame 
 
-glm::vec3 cameraFront(0.1,  0.1, 0.1); //Variavel global para matriz View
+glm::vec3 cameraFront(0, 0, 1); //Variavel global para matriz View
 
 
 //Variaveis globais de controle de tecla
@@ -128,7 +128,7 @@ int main(void){
     // Requisitando slot para a GPU para nossos programas Vertex e Fragment Shaders
     GLuint program = glCreateProgram();
     
-    Shader s("./mvp.vert", "./mvp.frag");
+    Shader s("./ilumination.vert", "./ilumination.frag");
 
     // Carregando Vertex Shadder
     if(s.loadVertexShader() != 0) {
@@ -193,6 +193,8 @@ int main(void){
         std::cout << "Is not render with quads" << std::endl;
         return r;
     }
+    // define parametros de ilumincao do modelo
+    obj1.setKa(0.2).setKd(0.5).setKs(0.9).setNs(32);
 
     GLuint buffer[2];
     glGenBuffers(2, buffer);
@@ -226,13 +228,13 @@ int main(void){
     MatModel mt_obj1, mt_obj2, mt_obj3;
 
     //Inicializa o objeto de camera responsavel por criar as matrizes VIEW e PROJECTION do pipeline MVP
-    camera Cam(program, glm::vec3(0.1, 0.1, 1), cameraFront, glm::vec3(0.0,1.0,0.0), 60, 1.0f, 0.1f, 100.0f, true);
+    camera Cam(program, glm::vec3(0, 1, -2), cameraFront, glm::vec3(0.0,1.0,0.0), 60, 1.0f, 0.1f, 10.0f, true);
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(1.0, 1.0, 1.0, 1.0);
+        glClearColor(0.1, 0.1, 0.1, 1.0);
 
         //Calcula quanto tempo se passou entre o ultimo frame e o atual
         float currentFrame = glfwGetTime();
@@ -263,7 +265,10 @@ int main(void){
         Cam.setFront(cameraFront);  //set para onde a camera deve olhar, calculado pela funcao de leitura do mouse
         Cam.update();               //atualiza e manda os valores das matrizes calculadas pelo objeto de camera para a GPU (VIEW e PROJECTION)
 
-                angulo += angulo_inc;
+        GLuint loc_light_pos = glGetUniformLocation(program, "lightPos"); // recuperando localizacao da variavel lightPos na GPU
+        glUniform3f(loc_light_pos, 5, 5, 0); // posicao da fonte de luz
+
+        angulo += angulo_inc;
 
         mt_obj1.setScale(0.05);
         mt_obj1.setTranslation(0.5, 0, 0);
@@ -280,6 +285,22 @@ int main(void){
         GLuint loc_mat_model = glGetUniformLocation(program, "model");
         glUniformMatrix4fv(loc_mat_model, 1, GL_TRUE, mt_obj1.getModelMatrix());
 
+        GLuint loc_ka = glGetUniformLocation(program, "ka"); // recuperando localizacao da variavel ka na GPU
+        glUniform1f(loc_ka, obj1.getKa()); // envia ka pra gpu
+
+        GLuint loc_kd = glGetUniformLocation(program, "kd"); // recuperando localizacao da variavel kd na GPU
+        glUniform1f(loc_kd, obj1.getKd()); // envia kd pra gpu    
+
+        GLuint loc_ks = glGetUniformLocation(program, "ks"); // recuperando localizacao da variavel ks na GPU
+        glUniform1f(loc_ks, obj1.getKs()); // envia ks pra gpu        
+
+        GLuint loc_ns = glGetUniformLocation(program, "ns"); // recuperando localizacao da variavel ns na GPU
+        glUniform1f(loc_ns, obj1.getNs()); // envia ns pra gpu 
+
+        // atualizando a posicao da camera/observador na GPU para calculo da reflexao especular
+        GLuint loc_view_pos = glGetUniformLocation(program, "viewPos"); // recuperando localizacao da variavel viewPos na GPU
+        glUniform3f(loc_view_pos, Cam.getPos().x, Cam.getPos().y, Cam.getPos().z); // posicao da camera/observador (x,y,z)  
+
         // glActiveTexture(textureID);
         glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
         glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getVertexEnd());
@@ -293,6 +314,18 @@ int main(void){
 
         loc_mat_model = glGetUniformLocation(program, "model");
         glUniformMatrix4fv(loc_mat_model, 1, GL_TRUE, mt_obj2.getModelMatrix());
+
+        loc_ka = glGetUniformLocation(program, "ka"); // recuperando localizacao da variavel ka na GPU
+        glUniform1f(loc_ka, obj1.getKa()); // envia ka pra gpu
+
+        loc_kd = glGetUniformLocation(program, "kd"); // recuperando localizacao da variavel kd na GPU
+        glUniform1f(loc_kd, obj1.getKd()); // envia kd pra gpu    
+
+        loc_ks = glGetUniformLocation(program, "ks"); // recuperando localizacao da variavel ks na GPU
+        glUniform1f(loc_ks, obj1.getKd()); // envia ks pra gpu        
+
+        loc_ns = glGetUniformLocation(program, "ns"); // recuperando localizacao da variavel ns na GPU
+        glUniform1f(loc_ns, obj1.getNs()); // envia ns pra gpu   
 
         // glActiveTexture(textureID);
         glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
@@ -309,10 +342,21 @@ int main(void){
         loc_mat_model = glGetUniformLocation(program, "model");
         glUniformMatrix4fv(loc_mat_model, 1, GL_TRUE, mt_obj3.getModelMatrix());
 
+        loc_ka = glGetUniformLocation(program, "ka"); // recuperando localizacao da variavel ka na GPU
+        glUniform1f(loc_ka, obj1.getKa()); // envia ka pra gpu
+
+        loc_kd = glGetUniformLocation(program, "kd"); // recuperando localizacao da variavel kd na GPU
+        glUniform1f(loc_kd, obj1.getKd()); // envia kd pra gpu    
+
+        loc_ks = glGetUniformLocation(program, "ks"); // recuperando localizacao da variavel ks na GPU
+        glUniform1f(loc_ks, obj1.getKd()); // envia ks pra gpu        
+
+        loc_ns = glGetUniformLocation(program, "ns"); // recuperando localizacao da variavel ns na GPU
+        glUniform1f(loc_ns, obj1.getNs()); // envia ns pra gpu  
+
         // glActiveTexture(textureID);
         glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
         glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getVertexEnd());
-
 
         glfwSwapBuffers(window);   
     }

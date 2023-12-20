@@ -19,6 +19,11 @@ OBJ3D::OBJ3D() {
 
     this->max_vertex_coordinates.set(0, 0, 0);
     this->min_vertex_coordinates.set(0, 0, 0);
+
+    this->ka = 0;
+    this->ka = 0;
+    this->kd = 0;
+    this->ns = 0;
 }
 
 OBJ3D::OBJ3D(std::string obj_path, int type_render) {
@@ -40,6 +45,11 @@ OBJ3D::OBJ3D(std::string obj_path, int type_render) {
 
     this->max_vertex_coordinates.set(0, 0, 0);
     this->min_vertex_coordinates.set(0, 0, 0);
+
+    this->ka = 0;
+    this->ka = 0;
+    this->kd = 0;
+    this->ns = 0;
 }
 
 OBJ3D::OBJ3D(const char* obj_path, int type_render) {
@@ -61,6 +71,11 @@ OBJ3D::OBJ3D(const char* obj_path, int type_render) {
 
     this->max_vertex_coordinates.set(0, 0, 0);
     this->min_vertex_coordinates.set(0, 0, 0);
+
+    this->ka = 0;
+    this->ka = 0;
+    this->kd = 0;
+    this->ns = 0;
 }
 
 OBJ3D::~OBJ3D() {
@@ -113,6 +128,42 @@ Vec3 OBJ3D::getMaxVertexCoordinates() {
 
 Vec3 OBJ3D::getMinVertexCoordinates() {
     return min_vertex_coordinates;
+}
+
+float OBJ3D::getKa() {
+    return ka;
+}
+
+float OBJ3D::getKd() {
+    return kd;
+}
+
+float OBJ3D::getKs() {
+    return ks;
+}
+
+float OBJ3D::getNs() {
+    return ns;
+}
+
+OBJ3D& OBJ3D::setKa(float ka) {
+    this->ka = ka;
+    return *this;
+}
+
+OBJ3D& OBJ3D::setKd(float kd) {
+    this->kd = kd;
+    return *this;
+}
+
+OBJ3D& OBJ3D::setKs(float ks) {
+    this->ks = ks;
+    return *this;
+}
+
+OBJ3D& OBJ3D::setNs(float ns) {
+    this->ns = ns;
+    return *this;
 }
 
 OBJ3D& OBJ3D::setTypeRender(int type_render) {
