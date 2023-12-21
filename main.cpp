@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <iomanip>
+#include <limits.h>
 #include <string>
 #include <vector>
 #include <time.h>
@@ -47,6 +48,8 @@ bool D = false;             //Caso a tecla D seja apertada
 
 int select_light = 0; // seleciona a luz a ser utilizada
 
+float ambient_light = 0, increasing_ambient_light = 0.01;
+
 //Funcao de callback para eventos de teclado
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
     if((key == GLFW_KEY_1 || key == GLFW_KEY_KP_1) && action == GLFW_PRESS) {
@@ -68,22 +71,41 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     if((key == GLFW_KEY_5 || key == GLFW_KEY_KP_5) && action == GLFW_PRESS) {
         select_light = 4;
     }
-    if(key == 87 && (action==1 || action==2)){ //Se tecla W apertada
+
+    if(key == GLFW_KEY_W && (action==1 || action==2)){ //Se tecla W apertada
         W = true;
     }
-    if(key == 83 && (action==1 || action==2)){ //Se tecla S apertada
+
+    if(key == GLFW_KEY_S && (action==1 || action==2)){ //Se tecla S apertada
         S = true;
     }
-    if(key == 65 && (action==1 || action==2)){ //Se tecla A apertada
+
+    if(key == GLFW_KEY_A && (action==1 || action==2)){ //Se tecla A apertada
         A = true;    
     }
-    if(key == 68 && (action==1 || action==2)){ //Se tecla D apertada
+
+    if(key == GLFW_KEY_D && (action==1 || action==2)){ //Se tecla D apertada
         D = true;
     }
-    if(key == GLFW_KEY_ESCAPE) //Se tecla Q apertada, entao diz que o programa deve ser fechado
+
+    if(key == GLFW_KEY_ESCAPE) {//Se tecla Q apertada, entao diz que o programa deve ser fechado
         stop = true;
+    } 
+
     if(key == GLFW_KEY_P && (action==1 || action==2)){ //Se tecla P apertada, entao ativara/desativara o modo poligono
         polygonMode = !polygonMode;
+    }
+
+    if(key == GLFW_KEY_KP_ADD) {
+        if(ambient_light < FLT_MAX) {
+            ambient_light += increasing_ambient_light;
+        }
+    }
+
+    if(key == GLFW_KEY_KP_SUBTRACT) {
+        if(ambient_light > 0) {
+            ambient_light -= increasing_ambient_light;
+        }
     }
 }
 
@@ -373,7 +395,7 @@ int main(void){
 
         for(int i = 0; i < QUANTIDADE_OBJS + 1; i++) {
             glUniformMatrix4fv(loc_mat_model, 1, GL_TRUE, mt_obj[i].getModelMatrix());
-            glUniform1f(loc_ka, objetos[i].getKa()); // envia ka pra gpu
+            glUniform1f(loc_ka, objetos[i].getKa() + ambient_light); // envia ka pra gpu
             glUniform1f(loc_kd, objetos[i].getKd()); // envia kd pra gpu    
             glUniform1f(loc_ks, objetos[i].getKs()); // envia ks pra gpu
             glUniform1f(loc_ns, objetos[i].getNs()); // envia ns pra gpu
