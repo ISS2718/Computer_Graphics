@@ -20,9 +20,9 @@ Nesse trabalho não foi utlizado o modelo Model-View-Projection e nem modelos de
 
 **Para mais informações do trabalho 1 [**clique aqui**](https://github.com/ISS2718/Computer_Graphics/blob/Trabalho_1/COMPUTACAO%20GRAFICA%20PROJETO%201.pdf).**
 
-### [Trabalho_2]()
+### [Trabalho_2](https://github.com/ISS2718/Computer_Graphics/tree/Trabalho_2)
 
-Ainda não foi criada...
+**Para mais informações do trabalho 1 [**clique aqui**](https://github.com/ISS2718/Computer_Graphics/blob/Trabalho_2/Trabalho%202%20-%20Computa%C3%A7%C3%A3o%20Gr%C3%A1fica%20-%202023-02%20(2).pdf).**
 
 ### [Exercícios](https://github.com/ISS2718/Computer_Graphics/tree/Exercícios)
 
