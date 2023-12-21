@@ -18,14 +18,13 @@
 #include "MatModel.h"
 #include "Camera.h"
 #include "OBJ3D.h"
-#include "Render.h"
 #include "Shader.h"
 #include "Texture.h"
 #include "Vec2.h"
 #include "Vec3.h"
 #include "Vec4.h"
 
-#define WAVEFRONT_PATH "./OBJ/obj/caixa.obj"
+#define QUANTIDADE_OBJS 7
 #define TEXTURE_PATH "./OBJ/obj/textures/caixa.jpg"
 
 
@@ -46,10 +45,29 @@ bool A = false;             //Caso a tecla A seja apertada
 bool S = false;             //Caso a tecla S seja apertada
 bool D = false;             //Caso a tecla D seja apertada
 
+int select_light = 0; // seleciona a luz a ser utilizada
 
 //Funcao de callback para eventos de teclado
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods){
-    float cameraSpeed = 0.1;
+    if((key == GLFW_KEY_1 || key == GLFW_KEY_KP_1) && action == GLFW_PRESS) {
+        select_light = 0;
+    }
+
+    if((key == GLFW_KEY_2 || key == GLFW_KEY_KP_2) && action == GLFW_PRESS) {
+        select_light = 1;
+    }
+
+    if((key == GLFW_KEY_3 || key == GLFW_KEY_KP_3) && action == GLFW_PRESS) {
+        select_light = 2;
+    }
+
+    if((key == GLFW_KEY_4 || key == GLFW_KEY_KP_4) && action == GLFW_PRESS) {
+        select_light = 3;
+    }
+
+    if((key == GLFW_KEY_5 || key == GLFW_KEY_KP_5) && action == GLFW_PRESS) {
+        select_light = 4;
+    }
     if(key == 87 && (action==1 || action==2)){ //Se tecla W apertada
         W = true;
     }
@@ -62,7 +80,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     if(key == 68 && (action==1 || action==2)){ //Se tecla D apertada
         D = true;
     }
-    if(key == GLFW_KEY_Q && (action==1 || action==2)) //Se tecla Q apertada, entao diz que o programa deve ser fechado
+    if(key == GLFW_KEY_ESCAPE) //Se tecla Q apertada, entao diz que o programa deve ser fechado
         stop = true;
     if(key == GLFW_KEY_P && (action==1 || action==2)){ //Se tecla P apertada, entao ativara/desativara o modo poligono
         polygonMode = !polygonMode;
@@ -102,6 +120,7 @@ void cursor_position_update(GLFWwindow* window){
     front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     cameraFront = glm::normalize(front);
 }
+
 int main(void){
  
     // inicicializando o sistema de\ janelas
@@ -165,39 +184,100 @@ int main(void){
     // Linkagem do programa e definindo como default
     glLinkProgram(program);
     glUseProgram(program);
-    
-    Texture txture(TEXTURE_PATH, GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT);
-    int r = txture.loadTexture();
-    if(r == -1) {
-        std::cout << "Textura " << TEXTURE_PATH << ": texture_path é nulo!!!" << std::endl;
-        exit(EXIT_FAILURE);
-    } else if(r == -2) {
-        std::cout << "Textura " << TEXTURE_PATH << ": Não foi possível carregar imgaem!!!" << std::endl;
-        exit(EXIT_FAILURE);
-    }
 
-    // Preparando dados para enviar a GPU
+
+// Vetores para enviar dados para enviar a GPU
     std::vector<Vec3> vertices;
     std::vector<Vec3> normals;
     std::vector<Vec2> uvs;
-    
-    OBJ3D obj1(WAVEFRONT_PATH, GL_TRIANGLES);
-    r = obj1.loadOBJ3D(&vertices, &uvs, &normals);
-    if(r == -1) {
-        std::cout << "File not found!" << std::endl;
-        return r;
-    } else if(r == -2) {
-        std::cout << "Is not render with triangles" << std::endl;
-        return r;
-    }  else if(r == -3) {
-        std::cout << "Is not render with quads" << std::endl;
-        return r;
-    }
-    // define parametros de ilumincao do modelo
-    obj1.setKa(0.2).setKd(0.5).setKs(0.9).setNs(32);
 
-    GLuint buffer[2];
-    glGenBuffers(2, buffer);
+    // Criando as objetos
+    OBJ3D objetos[QUANTIDADE_OBJS + 1] {
+        OBJ3D("./objetos/RumikCube.obj", GL_QUADS),
+        OBJ3D("./objetos/casa.obj", GL_TRIANGLES),
+        OBJ3D("./objetos/espada.obj", GL_QUADS),
+        OBJ3D("./objetos/torre.obj", GL_TRIANGLES),
+        OBJ3D("./objetos/cranio.obj", GL_TRIANGLES),
+        OBJ3D("./objetos/terreno.obj", GL_TRIANGLES),
+        OBJ3D("./objetos/luz.obj", GL_TRIANGLES),
+        OBJ3D("./objetos/skybox.obj", GL_TRIANGLES)
+    };
+
+    objetos[0].setKa(0.2).setKd(0.5).setKs(0.8).setNs(50); // define parametros de ilumincao do cubo mágico.
+    objetos[1].setKa(0.4).setKd(0.9).setKs(0.2).setNs(26); // define parametros de ilumincao da casa.
+    objetos[2].setKa(0.1).setKd(1).setKs(0.9).setNs(502); // define parametros de ilumincao da espada.
+    objetos[3].setKa(0.3).setKd(0.4).setKs(0.3).setNs(32); // define parametros de ilumincao da torre.
+    objetos[4].setKa(0.2).setKd(0.4).setKs(0.4).setNs(15); // define parametros de ilumincao do cranio.
+    objetos[5].setKa(0.1).setKd(0.1).setKs(0.9).setNs(40); // define parametros de ilumincao do terreno.
+    objetos[6].setKa(1).setKd(1).setKs(1).setNs(1000); // define parametros de ilumincao da luz.
+    objetos[6].setKa(1000).setKd(0).setKs(0).setNs(1); // define parametros de ilumincao da skybox.
+    
+
+    // Criando as texturas
+    Texture texturas[QUANTIDADE_OBJS + 1] {
+        Texture("./objetos/RumikCubeTexture.jpg"),
+        Texture("./objetos/casa.png"),
+        Texture("./objetos/espada.png"),
+        Texture("./objetos/torre.jpg"),
+        Texture("./objetos/cranio.jpg"),
+        Texture("./objetos/pedras.jpg"),
+        Texture("./objetos/luz.png"),
+        Texture("./objetos/skybox.png")
+    };
+
+    // criando posições de luzes
+    Vec3 luzes[5] {Vec3(5, 3.7, 2), Vec3(0, 2, 3.5), Vec3(-4.9, 4.2, -2), Vec3(10, 6, 0), Vec3(-8, 0.38, 5)};
+
+    // Criando escala iniciais dos objetos
+    float scale_obj[QUANTIDADE_OBJS + 1] = {0.1, 0.1, 0.02, 0.1, 0.01, 15, 0.1, 1};
+    // criando coordenadas iniciais dos objetos
+    Vec3 coord_obj[QUANTIDADE_OBJS + 1] = {Vec3(5, 1, 2), Vec3(0), Vec3(-2, 1, -2), Vec3(6,0.38,-3), Vec3(-6, 0.38, 5), Vec3(0), luzes[0], Vec3(0)};
+    // criando angulos iniciais dos objetos
+    Vec3 angle_obj[QUANTIDADE_OBJS + 1] = {Vec3(0), Vec3(0), Vec3(0), Vec3(0), Vec3(0), Vec3(0), Vec3(0), Vec3(0)};
+
+    // Criando matrizes de transformação
+    MatModel mt_obj[QUANTIDADE_OBJS + 1];
+    // Configurando as matrizes de transformação com os parâmetros iniciais
+    for(int i = 0; i < QUANTIDADE_OBJS + 1; i++) {
+        mt_obj[i].setScale(scale_obj[i]);
+        mt_obj[i].setTranslation(coord_obj[i].getX(), coord_obj[i].getY(), coord_obj[i].getZ());
+        mt_obj[i].setRotation(angle_obj[i].getX(), angle_obj[i].getY(), angle_obj[i].getZ());
+    };
+    
+   // Carregando texturas
+    for(int i = 0; i < QUANTIDADE_OBJS + 1; i++) {
+        texturas[i].setMagFilterType(GL_LINEAR);
+        texturas[i].setMinFilterType(GL_LINEAR);
+        texturas[i].setWrapSType(GL_REPEAT);
+        texturas[i].setWrapTType(GL_REPEAT);
+
+        int r = texturas[i].loadTexture();
+        if(r == -1) {
+            std::cout << "Textura " << i << ": texture_path é nulo!!!" << std::endl;
+            return r;
+        } else if(r == -2) {
+            std::cout << "Textura " << i << ": Não foi possível carregar imgaem!!!" << std::endl;
+            return r;
+        }
+    }
+
+    // Carregando objetos
+    for(int i = 0; i < QUANTIDADE_OBJS + 1; i++) {
+        int r = objetos[i].loadOBJ3D(&vertices, &uvs, &normals);
+        if(r == -1) {
+            std::cout << "Objeto " << i << ": Arquivo não encontrado!" << std::endl;
+            return r;
+        } else if(r == -2) {
+            std::cout << "Objeto " << i << ": Não é composto por triangulos" << std::endl;
+            return r;
+        }  else if(r == -3) {
+            std::cout << "Objeto " << i << ": Não é composto por quadrados" << std::endl;
+            return r;
+        }
+    }
+
+    GLuint buffer[3];
+    glGenBuffers(3, buffer);
 
 
     // Abaixo, nós enviamos todo o conteúdo da variável vertices.
@@ -219,18 +299,27 @@ int main(void){
     glEnableVertexAttribArray(loc_texture_coord);
     glVertexAttribPointer(loc_texture_coord, 2, GL_FLOAT, GL_FALSE, sizeof(uvs[0]), (void*) 0); // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glVertexAttribPointer.xhtml
 
+    // Abaixo, nós enviamos todo o conteúdo da variável normals.
+    glBindBuffer(GL_ARRAY_BUFFER, buffer[2]);
+    glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(Vec3), &normals[0], GL_STATIC_DRAW);
+
+    // Associando variáveis do programa GLSL (Vertex Shaders) com nossos dados
+    GLint loc_normals = glGetAttribLocation(program, "normals");
+    glEnableVertexAttribArray(loc_normals);
+    glVertexAttribPointer(loc_normals, 3, GL_FLOAT, GL_FALSE, sizeof(normals[0]), (void*) 0); // https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glVertexAttribPointer.xhtml
+
     // Exibindo nossa janela
     glfwShowWindow(window);
 
     glEnable(GL_DEPTH_TEST);// ### importante para 3D
 
-    float angulo = 0.0, angulo_inc = 0.0001; 
-    MatModel mt_obj1, mt_obj2, mt_obj3;
-
     //Inicializa o objeto de camera responsavel por criar as matrizes VIEW e PROJECTION do pipeline MVP
-    camera Cam(program, glm::vec3(0, 1, -2), cameraFront, glm::vec3(0.0,1.0,0.0), 60, 1.0f, 0.1f, 10.0f, true);
+    camera Cam(program, glm::vec3(0, 1, -2), cameraFront, glm::vec3(0.0,1.0,0.0), 60, 1.0f, 0.1f, 100.0f, true);
 
-    while (!glfwWindowShouldClose(window)) {
+    float angle = 0;            //Angulo responsavel pela movimentacao em circulos do modelo do cachorro
+    float angle_inc = 0.001;      
+
+    while (!glfwWindowShouldClose(window) && !stop) {
         glfwPollEvents();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -266,97 +355,48 @@ int main(void){
         Cam.update();               //atualiza e manda os valores das matrizes calculadas pelo objeto de camera para a GPU (VIEW e PROJECTION)
 
         GLuint loc_light_pos = glGetUniformLocation(program, "lightPos"); // recuperando localizacao da variavel lightPos na GPU
-        glUniform3f(loc_light_pos, 5, 5, 0); // posicao da fonte de luz
+        glUniform3f(loc_light_pos, luzes[select_light].getX(), luzes[select_light].getY(), luzes[select_light].getZ()); // posicao da fonte de luz
+        mt_obj[6].setTranslation(luzes[select_light].getX(), luzes[select_light].getY(), luzes[select_light].getZ());
 
-        angulo += angulo_inc;
 
-        mt_obj1.setScale(0.05);
-        mt_obj1.setTranslation(0.5, 0, 0);
-
-        mt_obj1.setRotationX(angulo);
-        // mt_obj1.setRotationY(M_PI/2);
-        // mt_obj1.setRotationZ(M_PI/2);
-
-        // observador.setCameraCoordinates(coordinates.getX(), coordinates.getY(), coordinates.getZ());
-        // observador.setCameraTarget(target.getX(), target.getY(), target.getZ());
-        // observador.setCameraViewUp(view_up.getX(), view_up.getY(), view_up.getZ());
-
-        // enviando a matriz de transformacao para a GPU
         GLuint loc_mat_model = glGetUniformLocation(program, "model");
-        glUniformMatrix4fv(loc_mat_model, 1, GL_TRUE, mt_obj1.getModelMatrix());
-
         GLuint loc_ka = glGetUniformLocation(program, "ka"); // recuperando localizacao da variavel ka na GPU
-        glUniform1f(loc_ka, obj1.getKa()); // envia ka pra gpu
-
         GLuint loc_kd = glGetUniformLocation(program, "kd"); // recuperando localizacao da variavel kd na GPU
-        glUniform1f(loc_kd, obj1.getKd()); // envia kd pra gpu    
-
         GLuint loc_ks = glGetUniformLocation(program, "ks"); // recuperando localizacao da variavel ks na GPU
-        glUniform1f(loc_ks, obj1.getKs()); // envia ks pra gpu        
-
         GLuint loc_ns = glGetUniformLocation(program, "ns"); // recuperando localizacao da variavel ns na GPU
-        glUniform1f(loc_ns, obj1.getNs()); // envia ns pra gpu 
+        GLuint its_skybox = glGetUniformLocation(program, "its_skybox"); // recuperando localizacao da variavel its_kybox na GPU  
+
+        angle += angle_inc;
+        mt_obj[0].setRotation(-angle, angle, -angle);
+        mt_obj[2].setRotation(angle, -angle, angle);
+        
+
+        for(int i = 0; i < QUANTIDADE_OBJS + 1; i++) {
+            glUniformMatrix4fv(loc_mat_model, 1, GL_TRUE, mt_obj[i].getModelMatrix());
+            glUniform1f(loc_ka, objetos[i].getKa()); // envia ka pra gpu
+            glUniform1f(loc_kd, objetos[i].getKd()); // envia kd pra gpu    
+            glUniform1f(loc_ks, objetos[i].getKs()); // envia ks pra gpu
+            glUniform1f(loc_ns, objetos[i].getNs()); // envia ns pra gpu
+            if(i == 7) {
+                glUniform1f(its_skybox, 1.0); // envia que é uma skybox pra gpu
+            } else {
+                glUniform1f(its_skybox, 0.0);
+            }
+
+            // glActiveTexture(textureID);
+            if(!polygonMode) {
+                glBindTexture(GL_TEXTURE_2D, texturas[i].getTextureID());
+                glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            } else {
+                glBindTexture(GL_TEXTURE_2D, 0);
+                glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            }
+            glDrawArrays(objetos[i].getTypeRender(), objetos[i].getVertexStart(), objetos[i].getVertexSize());
+        }
 
         // atualizando a posicao da camera/observador na GPU para calculo da reflexao especular
         GLuint loc_view_pos = glGetUniformLocation(program, "viewPos"); // recuperando localizacao da variavel viewPos na GPU
-        glUniform3f(loc_view_pos, Cam.getPos().x, Cam.getPos().y, Cam.getPos().z); // posicao da camera/observador (x,y,z)  
-
-        // glActiveTexture(textureID);
-        glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
-        glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getVertexEnd());
-
-        mt_obj2.setScale(0.1);
-        mt_obj2.setTranslation(-0.5, 0, 0);
-
-        // mt_obj2.setRotationX(angulo);
-        mt_obj2.setRotationY(angulo);
-        // mt_obj2.setRotationZ(angulo);
-
-        loc_mat_model = glGetUniformLocation(program, "model");
-        glUniformMatrix4fv(loc_mat_model, 1, GL_TRUE, mt_obj2.getModelMatrix());
-
-        loc_ka = glGetUniformLocation(program, "ka"); // recuperando localizacao da variavel ka na GPU
-        glUniform1f(loc_ka, obj1.getKa()); // envia ka pra gpu
-
-        loc_kd = glGetUniformLocation(program, "kd"); // recuperando localizacao da variavel kd na GPU
-        glUniform1f(loc_kd, obj1.getKd()); // envia kd pra gpu    
-
-        loc_ks = glGetUniformLocation(program, "ks"); // recuperando localizacao da variavel ks na GPU
-        glUniform1f(loc_ks, obj1.getKd()); // envia ks pra gpu        
-
-        loc_ns = glGetUniformLocation(program, "ns"); // recuperando localizacao da variavel ns na GPU
-        glUniform1f(loc_ns, obj1.getNs()); // envia ns pra gpu   
-
-        // glActiveTexture(textureID);
-        glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
-        glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getVertexEnd());
-
-
-        mt_obj3.setScale(0.3);
-        mt_obj3.setTranslation(0, 0, 0);
-
-        // mat_transformation.setRotationX(angulo);
-        // mat_transformation.setRotationY(angulo);
-        mt_obj3.setRotationZ(angulo);
-
-        loc_mat_model = glGetUniformLocation(program, "model");
-        glUniformMatrix4fv(loc_mat_model, 1, GL_TRUE, mt_obj3.getModelMatrix());
-
-        loc_ka = glGetUniformLocation(program, "ka"); // recuperando localizacao da variavel ka na GPU
-        glUniform1f(loc_ka, obj1.getKa()); // envia ka pra gpu
-
-        loc_kd = glGetUniformLocation(program, "kd"); // recuperando localizacao da variavel kd na GPU
-        glUniform1f(loc_kd, obj1.getKd()); // envia kd pra gpu    
-
-        loc_ks = glGetUniformLocation(program, "ks"); // recuperando localizacao da variavel ks na GPU
-        glUniform1f(loc_ks, obj1.getKd()); // envia ks pra gpu        
-
-        loc_ns = glGetUniformLocation(program, "ns"); // recuperando localizacao da variavel ns na GPU
-        glUniform1f(loc_ns, obj1.getNs()); // envia ns pra gpu  
-
-        // glActiveTexture(textureID);
-        glBindTexture(GL_TEXTURE_2D, txture.getTextureID());
-        glDrawArrays(obj1.getTypeRender(), obj1.getVertexStart(), obj1.getVertexEnd());
+        glUniform3f(loc_view_pos, Cam.getPos().x, Cam.getPos().y, Cam.getPos().z); // posicao da camera/observador (x,y,z) 
 
         glfwSwapBuffers(window);   
     }

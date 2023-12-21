@@ -11,7 +11,7 @@ uniform vec3 viewPos; // define coordenadas com a posicao da camera/observador
 uniform float ks; // coeficiente de reflexao especular
 uniform float ns; // expoente de reflexao especular
 
-
+uniform float its_skybox;
 
 // parametros recebidos do vertex shader
 varying vec2 out_texture; // recebido do vertex shader
@@ -41,7 +41,10 @@ void main(){
     
     // aplicando o modelo de iluminacao
     vec4 texture = texture2D(samplerTexture, out_texture);
-    vec4 result = vec4((ambient + diffuse + specular),1.0) * texture; // aplica iluminacao
-    gl_FragColor = result;
-
+    if(its_skybox == 1.0) {
+        gl_FragColor = texture;
+    } else {
+        vec4 result = vec4((ambient + diffuse + specular),1.0) * texture; // aplica iluminacao
+        gl_FragColor = result;
+    }
 }
